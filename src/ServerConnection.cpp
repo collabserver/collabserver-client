@@ -1,24 +1,22 @@
-#include "ServerProxy.h"
-
-#include "network/NetHelper.h"
+#include "ServerConnection.h"
 
 #include <cassert>
 #include <stdio.h>
-#include <elephantlogger/log.h>
+
+namespace collab {
 
 
-using namespace collab;
 class IMessage;
 
 
-bool ServerProxy::connect(const char* ip, const int port, const float timeout) {
+bool ServerConnection::connect(const char* ip, const int port, const float timeout) {
     assert(this->m_isConnected == false);
     if(this->m_isConnected) {
-        LOG_TRACE(0, "Proxy already connected.");
+        //LOG_TRACE(0, "Proxy already connected."); // TODO
         return false;
     }
 
-    LOG_TRACE(0, "Try to connect proxy to %s:%d", ip, port);
+    //LOG_TRACE(0, "Try to connect proxy to %s:%d", ip, port); // TODO
 
     static zmq::socket_t zmqSocket(this->m_context, ZMQ_REQ);
 
@@ -38,7 +36,7 @@ bool ServerProxy::connect(const char* ip, const int port, const float timeout) {
     return true;
 }
 
-bool ServerProxy::disconnect() {
+bool ServerConnection::disconnect() {
     if(!this->m_isConnected) {
         return false;
     }
@@ -50,12 +48,17 @@ bool ServerProxy::disconnect() {
     return res == 0 ? true : false;
 }
 
-void ServerProxy::sendMessage(const IMessage & msg) {
-    NetHelper::sendMessage(*this->m_socketSend, msg);
+void ServerConnection::sendMessage(const IMessage & msg) {
+    //NetHelper::sendMessage(*this->m_socketSend, msg); // TODO
     zmq::message_t request;
     this->m_socketSend->recv(&request);
 }
 
-bool ServerProxy::isConnected() const {
+bool ServerConnection::isConnected() const {
     return this->m_isConnected;
 }
+
+
+} // End namespace
+
+

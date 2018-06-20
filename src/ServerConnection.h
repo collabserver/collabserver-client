@@ -1,30 +1,30 @@
 #pragma once
 
-#include "util/Singleton.h"
-
 #include <zmq.hpp>
 
+#include "utils/Singleton.h"
 
 namespace collab {
+
+
 class IMessage;
 
 
 /**
- * C++ network proxy connection.
+ * C++ network server connection.
  *
  * \author  Constantin
  * \date    Dec 2017
- * \since   0.1.0
  */
-class ServerProxy : private Singleton<ServerProxy> {
+class ServerConnection : private Singleton<ServerConnection> {
 
     // Singleton elements
     private:
-        friend Singleton<ServerProxy>;
-        ServerProxy() = default;
-        ~ServerProxy() = default;
+        friend Singleton<ServerConnection>;
+        ServerConnection() = default;
+        ~ServerConnection() = default;
     public:
-        using Singleton<ServerProxy>::getInstance;
+        using Singleton<ServerConnection>::getInstance;
 
 
     private:
@@ -45,3 +45,5 @@ class ServerProxy : private Singleton<ServerProxy> {
 
 
 } // End namespace
+
+

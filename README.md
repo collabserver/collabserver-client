@@ -1,2 +1,2 @@
-# Collab Proxy Client
+# Collab Client Interface
 > Work in progress.
