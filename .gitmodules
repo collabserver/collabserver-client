@@ -1,0 +1,4 @@
+[submodule "gitmodules/collab-messaging-protocol"]
+	path = gitmodules/collab-messaging-protocol
+	url = https://github.com/CollabServer/collab-messaging-protocol.git
+    branch = dev
