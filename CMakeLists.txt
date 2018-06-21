@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.2 FATAL_ERROR)
-project(collab-server)
+project(collab-client-interface)
 
 if("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
     message(FATAL_ERROR "in-source build not allowed. Use another directory.")
@@ -26,14 +26,16 @@ endif()
 
 
 # ------------------------------------------------------------------------------
-# Client Interface Static LIB
+# Client Interface (Static LIB)
 # ------------------------------------------------------------------------------
 include_directories("${CMAKE_SOURCE_DIR}/include")
 include_directories("${CMAKE_SOURCE_DIR}/gitmodules/collab-messaging-protocol/include")
 
 file(GLOB_RECURSE srcFiles ${CMAKE_SOURCE_DIR}/src/*.cpp)
+
 add_library(client_interface STATIC ${srcFiles})
 add_custom_target(client client_interface)
+
 target_link_libraries(client_interface "zmq")
 
 
