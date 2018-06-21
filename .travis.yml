@@ -1,0 +1,19 @@
+language: cpp
+dist: trusty
+sudo: required
+os: linux
+
+compiler:
+    - gcc
+    - clang
+
+install:
+    - sudo apt-get install libzmq-dev
+
+before_script:
+    - mkdir build
+    - cd build
+    - cmake ..
+
+script:
+    - make -j4
