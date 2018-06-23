@@ -2,7 +2,7 @@
 
 #include <zmq.hpp>
 
-#include "utils/Singleton.h"
+#include "collabcommon/utils/Singleton.h"
 
 namespace collab {
 

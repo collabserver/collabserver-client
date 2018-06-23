@@ -30,7 +30,7 @@ endif()
 # Client Interface (Static LIB)
 # ------------------------------------------------------------------------------
 include_directories("${CMAKE_SOURCE_DIR}/include")
-include_directories("${CMAKE_SOURCE_DIR}/gitmodules/collab-messaging-protocol/include")
+include_directories("${CMAKE_SOURCE_DIR}/gitmodules/collab-common/include")
 
 file(GLOB_RECURSE srcFiles ${CMAKE_SOURCE_DIR}/src/*.cpp)
 

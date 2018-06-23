@@ -1,4 +1,5 @@
-[submodule "gitmodules/collab-messaging-protocol"]
-	path = gitmodules/collab-messaging-protocol
-	url = https://github.com/CollabServer/collab-messaging-protocol.git
-    branch = dev
+[submodule "gitmodules/collab-common"]
+	path = gitmodules/collab-common
+	url = https://github.com/CollabServer/collab-common.git
+	branch = dev
+
