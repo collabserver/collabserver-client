@@ -9,21 +9,9 @@ endif()
 # ------------------------------------------------------------------------------
 # Various
 # ------------------------------------------------------------------------------
-set(DEPENDENCY_DIR "${CMAKE_SOURCE_DIR}/bin/")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(collab_dependency_dir "${CMAKE_SOURCE_DIR}/bin/")
 
-
-# ------------------------------------------------------------------------------
-# Tests
-# ------------------------------------------------------------------------------
-option(BUILD_TESTS "Build Tests" OFF)
-
-if(BUILD_TESTS)
-    message(STATUS "Build tests")
-    include("CMake/AddTests.cmake")
-else()
-    message(STATUS "Doesn't build tests")
-endif()
+include("CMake/AddCompilerFlags.cmake")
 
 
 # ------------------------------------------------------------------------------
@@ -34,9 +22,9 @@ include_directories("${CMAKE_SOURCE_DIR}/gitmodules/collab-common/include")
 
 file(GLOB_RECURSE srcFiles ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
-add_library(client_interface STATIC ${srcFiles})
-add_custom_target(client client_interface)
+add_library(collab_client STATIC ${srcFiles})
+add_custom_target(buildClient collab_client)
 
-target_link_libraries(client_interface "zmq")
+target_link_libraries(collab_client "zmq")
 
 
