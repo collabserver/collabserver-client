@@ -1,5 +1,7 @@
 #pragma once
 
+#include "collabdata/custom/CollabData.h"
+
 namespace collab {
 
 
@@ -9,6 +11,9 @@ namespace collab {
  * TODO Documentation
  */
 class Client {
+    private:
+        CollabData* _data;
+
     public:
         Client() = default;
         ~Client();
@@ -32,6 +37,20 @@ class Client {
          * \return True if successfully disconnected, otherwise, return false
          */
         bool disconnect();
+
+        /**
+         * Check whether client is currently connected to a CollabServer.
+         *
+         * \return True if connected, otherwise, return false.
+         */
+        bool isConnected();
+
+        /**
+         * TODO
+         */
+        CollabData* loadData(int dataType, int dataID);
+
+        bool unloadData();
 };
 
 
