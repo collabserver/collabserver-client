@@ -4,11 +4,9 @@ namespace collab {
 
 
 /*
- * This is the main (And only) end user class.
- * Gives all end-user functions to use the collaborative server.
+ * End user client.
  *
- * \author  Constantin Masson
- * \date    Feb 208
+ * TODO Documentation
  */
 class Client {
     public:

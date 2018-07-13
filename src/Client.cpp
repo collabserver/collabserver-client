@@ -1,20 +1,20 @@
 #include "collabclient/Client.h"
 
-#include "ServerConnection.h"
-
 namespace collab {
 
 
 Client::~Client() {
-    ServerConnection::getInstance().disconnect();
+    this->disconnect();
 }
 
 bool Client::connect(const char* ip, const int port, const float timeout) {
-    return ServerConnection::getInstance().connect(ip, port, timeout);
+    // TODO call ZMQSocket::connet
+    return false;
 }
 
 bool Client::disconnect() {
-    return ServerConnection::getInstance().disconnect();
+    // TODO call ZMQSocket::disconnect
+    return false;
 }
 
 
