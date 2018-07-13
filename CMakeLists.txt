@@ -14,6 +14,7 @@ set(collab_gitmodule_dir "${CMAKE_SOURCE_DIR}/gitmodules/")
 
 include("CMake/AddCompilerFlags.cmake")
 include("CMake/ExternalProjects/Collabcommon.cmake")
+include("CMake/ExternalProjects/Collabdata.cmake")
 
 
 # ------------------------------------------------------------------------------
@@ -21,6 +22,7 @@ include("CMake/ExternalProjects/Collabcommon.cmake")
 # ------------------------------------------------------------------------------
 include_directories("${CMAKE_SOURCE_DIR}/include")
 include_directories("${CMAKE_SOURCE_DIR}/gitmodules/collab-common/include")
+include_directories("${CMAKE_SOURCE_DIR}/gitmodules/collab-data-crdts/include")
 
 file(GLOB_RECURSE srcFiles ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
