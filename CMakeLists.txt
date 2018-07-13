@@ -9,9 +9,11 @@ endif()
 # ------------------------------------------------------------------------------
 # Various
 # ------------------------------------------------------------------------------
-set(collab_dependency_dir "${CMAKE_SOURCE_DIR}/bin/")
+set(collab_dependency_dir "${CMAKE_SOURCE_DIR}/dependency/")
+set(collab_gitmodule_dir "${CMAKE_SOURCE_DIR}/gitmodules/")
 
 include("CMake/AddCompilerFlags.cmake")
+include("CMake/ExternalProjects/Collabcommon.cmake")
 
 
 # ------------------------------------------------------------------------------
@@ -22,9 +24,9 @@ include_directories("${CMAKE_SOURCE_DIR}/gitmodules/collab-common/include")
 
 file(GLOB_RECURSE srcFiles ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
-add_library(collab_client STATIC ${srcFiles})
-add_custom_target(buildClient collab_client)
+add_library(collabclient STATIC ${srcFiles})
+add_custom_target(buildClient collabclient)
 
-target_link_libraries(collab_client "zmq")
+target_link_libraries(collabclient zmq)
 
 
