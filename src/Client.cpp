@@ -4,26 +4,22 @@
 
 #include "collabcommon/messaging/MessageFactory.h"
 #include "collabcommon/messaging/Message.h"
-#include "collabcommon/network/Network.h"
 #include "collabcommon/network/ZMQSocket.h"
 
 namespace collab {
 
 
-static ZMQSocket*   _socket = nullptr;
+static ZMQSocket* _socket = nullptr;
 
 
 Client::~Client() {
     this->disconnect();
-    network::shutdownNetwork();
 }
 
 bool Client::connect(const char* ip, const int port, const float timeout) {
-    network::initNetwork();
-
     ZMQSocketConfig config = {
         ZMQ_REQ,
-        &network::g_context,
+        &g_context,
         &(MessageFactory::getInstance())
     };
 
@@ -35,22 +31,19 @@ bool Client::connect(const char* ip, const int port, const float timeout) {
     if(_socket == nullptr) {
         return false;
     }
-    bool success = _socket->connect(ip, port);
-    if(!success) {
-        // TODO DEBUG
-        //return false;
-    }
-    // TODO DEBUG
+    _socket->connect(ip, port);
+    // TODO DEBUG for now, simply send debug msg
     std::unique_ptr<Message> m;
     m = config.factory->newMessage(MessageFactory::MSG_DEBUG);
     _socket->sendMessage(*m);
-    return success;
+    return true;
 }
 
 bool Client::disconnect() {
     assert(_socket != nullptr);
     if(_socket != nullptr) {
-        return _socket->disconnect();
+        _socket->disconnect();
+        return true;
     }
     return false;
 }
