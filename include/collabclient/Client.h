@@ -1,6 +1,7 @@
 #pragma once
 
 #include "collabdata/custom/CollabData.h"
+#include "DataID.h"
 
 namespace collab {
 
@@ -23,6 +24,7 @@ class Client {
         /**
          * Try to open connection with the remote server.
          * Connection tentative may be timed out if timeout is set.
+         * (Infinite timeout if value equal or inferior to 0)
          *
          * \param ip        IP of the remove server.
          * \param port      Port of the remove server.
@@ -48,9 +50,7 @@ class Client {
         /**
          * TODO
          */
-        CollabData* loadData(int dataType, int dataID);
-
-        bool unloadData();
+        CollabData* createVolatile(int dataType, int dataID);
 };
 
 

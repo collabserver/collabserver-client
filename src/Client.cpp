@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "collabcommon/messaging/MessageFactory.h"
+#include "collabcommon/messaging/Message.h"
 #include "collabcommon/network/Network.h"
 #include "collabcommon/network/ZMQSocket.h"
 
@@ -26,15 +27,24 @@ bool Client::connect(const char* ip, const int port, const float timeout) {
         &(MessageFactory::getInstance())
     };
 
-    assert(_socket == nullptr);
     if(_socket != nullptr) {
         return false;
     }
     _socket = new ZMQSocket(config);
+    assert(_socket != nullptr);
     if(_socket == nullptr) {
         return false;
     }
-    return _socket->connect(ip, port);
+    bool success = _socket->connect(ip, port);
+    if(!success) {
+        // TODO DEBUG
+        //return false;
+    }
+    // TODO DEBUG
+    std::unique_ptr<Message> m;
+    m = config.factory->newMessage(MessageFactory::MSG_DEBUG);
+    _socket->sendMessage(*m);
+    return success;
 }
 
 bool Client::disconnect() {

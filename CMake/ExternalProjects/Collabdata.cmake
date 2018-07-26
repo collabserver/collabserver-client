@@ -12,8 +12,8 @@ ExternalProject_Add(collab-data-crdts
 
 add_library(collabdata STATIC IMPORTED)
 ExternalProject_Get_Property(collab-data-crdts BINARY_DIR)
-set_property(TARGET collabdata PROPERTY
-    IMPORTED_LOCATION "${BINARY_DIR}/libcollabdata.a")
+set_property(TARGET collabdata
+    PROPERTY IMPORTED_LOCATION "${BINARY_DIR}/libcollabdata.a")
 
 
 

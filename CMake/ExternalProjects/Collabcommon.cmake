@@ -12,5 +12,5 @@ ExternalProject_Add(collab-common
 
 add_library(collabcommon STATIC IMPORTED)
 ExternalProject_Get_Property(collab-common BINARY_DIR)
-set_property(TARGET collabcommon PROPERTY
-    IMPORTED_LOCATION "${BINARY_DIR}/libcollabcommon.a")
+set_property(TARGET collabcommon
+    PROPERTY IMPORTED_LOCATION "${BINARY_DIR}/libcollabcommon.a")

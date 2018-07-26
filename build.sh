@@ -7,7 +7,9 @@ set -v
 mkdir build || true
 cd build
 
-cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ..
+cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+      -Dcollab_examples=OFF \
+      ..
 make
 
 
