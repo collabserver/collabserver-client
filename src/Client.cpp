@@ -4,7 +4,7 @@
 
 #include "collabcommon/messaging/MessageFactory.h"
 #include "collabcommon/messaging/Message.h"
-#include "collabcommon/msg/MsgConnectionSuccess.h"
+#include "collabcommon/messaging/MessageList.h"
 #include "collabcommon/network/ZMQSocket.h"
 
 namespace collab {
