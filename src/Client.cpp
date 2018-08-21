@@ -35,6 +35,7 @@ bool Client::connect(const char* ip, const int port, const float timeout) {
     _socket->connect(ip, port);
     std::unique_ptr<Message> m;
     m = config.factory->newMessage(MessageFactory::MSG_CONNECTION_REQ);
+    assert(m != nullptr);
     _socket->sendMessage(*m);
 
     m = _socket->receiveMessage();
