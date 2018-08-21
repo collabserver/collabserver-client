@@ -4,6 +4,7 @@
 
 #include "collabcommon/messaging/MessageFactory.h"
 #include "collabcommon/messaging/Message.h"
+#include "collabcommon/msg/MsgConnectionSuccess.h"
 #include "collabcommon/network/ZMQSocket.h"
 
 namespace collab {
@@ -32,15 +33,22 @@ bool Client::connect(const char* ip, const int port, const float timeout) {
         return false;
     }
     _socket->connect(ip, port);
-    // TODO DEBUG for now, simply send debug msg
     std::unique_ptr<Message> m;
-    m = config.factory->newMessage(MessageFactory::MSG_DEBUG);
+    m = config.factory->newMessage(MessageFactory::MSG_CONNECTION_REQ);
     _socket->sendMessage(*m);
+
+    m = _socket->receiveMessage();
+    if(m->getType() != MessageFactory::MSG_CONNECTION_SUCCESS) {
+        // this->disconnect(); // TODO Maybe to add (To check for validity)
+        return false;
+    }
+    // TODO Set user id from message
     return true;
 }
 
 bool Client::disconnect() {
     assert(_socket != nullptr);
+    // TODO Cleanup all the data (IDs etc)
     if(_socket != nullptr) {
         _socket->disconnect();
         return true;
@@ -48,8 +56,8 @@ bool Client::disconnect() {
     return false;
 }
 
-bool Client::isConnected() {
-    return _socket != nullptr;
+bool Client::isConnected() const {
+    return _socket != nullptr && _userID != -1;
 }
 
 
