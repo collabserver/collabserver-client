@@ -1,13 +1,14 @@
 # ------------------------------------------------------------------------------
 # Project collab-common (gitsubmodule)
 # ------------------------------------------------------------------------------
+
 include(ExternalProject)
 ExternalProject_Add(collab-common
     SOURCE_DIR          "${collab_gitmodule_dir}/collab-common/"
     BINARY_DIR          "${CMAKE_BINARY_DIR}/collab-common-build/"
     INSTALL_COMMAND     ""
     TEST_COMMAND        ""
-    CMAKE_ARGS          "${CMAKE_BUILD_TYPE}"
+    CMAKE_ARGS          "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
 )
 
 add_library(collabcommon STATIC IMPORTED)
