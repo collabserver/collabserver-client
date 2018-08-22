@@ -16,12 +16,12 @@ class Client {
     private:
         CollabData* _data               = nullptr;
         int         _dataID             = -1;
-        int         _dataType           = -1;
+        int         _dataTypeID         = -1;
         int         _nbCollaborators    = -1;
         int         _userID             = -1;
 
     public:
-        Client() = default;
+        Client();
         ~Client();
 
     public:
@@ -30,6 +30,9 @@ class Client {
          * Try to open connection with the remote server.
          * Connection tentative may be timed out if timeout is set.
          * (Infinite timeout if value equal or inferior to 0)
+         *
+         * \bug
+         * timeout not implemented yet
          *
          * \param ip        IP of the remove server.
          * \param port      Port of the remove server.
@@ -50,22 +53,39 @@ class Client {
          *
          * \return True if connected, otherwise, return false.
          */
-        bool isConnected() const;
+        bool isConnected() const { return _userID != -1; }
 
         /**
          * Creates new collaborative data on server and join it.
-         * Data is volative on server and won't be saved on a database.
+         * Data is volatile on server and won't be saved on a database.
+         * Do nothing if another data is already loaded (And returns false).
          *
-         * Creates a new collaborative instance on server for a given data type.
-         * The collab instance has a unique ID that you can
-         * recover so that other users may join this collaborative data.
+         * Current dataID is set with the ID server gave to this collab data.
+         * You may share this ID with other in order to join the collaboration.
          *
-         * This methods wait and block until server answer.
+         * This methods wait and block until server answers.
          *
-         * \param dataType Type of data to create (See server registered data)
+         * \param dataTypeID Type of data to create (See server registered data)
          * \return True if successfully created, otherwise, return false.
          */
-        bool createVolatile(int dataType);
+        bool createDataVolatile(int dataTypeID);
+
+        /**
+         * Join a collab data already started on server side.
+         * Data ID is attributed by the server. You may get it from its owner.
+         *
+         * \param dataID Unique ID of the data on server.
+         * \return True if successfully joined, otherwise, return false.
+         */
+        bool joinData(int dataID);
+
+        /**
+         * Leave the current data collaboration.
+         * Does nothing if no data already loaded.
+         *
+         * \return True if successfully left, otherwise, return false.
+         */
+        bool leaveData();
 
         /**
          * Check whether a CollabServer data has been loaded.
@@ -73,9 +93,7 @@ class Client {
          *
          * \return True if data loaded, otherwise, return false.
          */
-        bool isDataLoaded() const {
-            return _data != nullptr;
-        }
+        bool isDataLoaded() const { return _data != nullptr; }
 
 
     // ---------------------------------------------------------------------
@@ -85,7 +103,7 @@ class Client {
     public:
         int getNbCollaborators() const { return _nbCollaborators; }
         int getDataID() const { return _dataID; }
-        int getDataType() const { return _dataType; }
+        int getDataTypeID() const { return _dataTypeID; }
         CollabData* getCollabData() { return _data; }
 };
 
