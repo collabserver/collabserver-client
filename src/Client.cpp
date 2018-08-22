@@ -33,17 +33,19 @@ bool Client::connect(const char* ip, const int port, const float timeout) {
         return false;
     }
     _socket->connect(ip, port);
-    std::unique_ptr<Message> m;
-    m = config.factory->newMessage(MessageFactory::MSG_CONNECTION_REQ);
+
+    Message* m = config.factory->newMessage(MessageFactory::MSG_CONNECTION_REQ);
     assert(m != nullptr);
     _socket->sendMessage(*m);
+    config.factory->freeMessage(m);
 
     m = _socket->receiveMessage();
     if(m->getType() != MessageFactory::MSG_CONNECTION_SUCCESS) {
         // this->disconnect(); // TODO Maybe to add (To check for validity)
         return false;
     }
-    // TODO Set user id from message
+    _userID = static_cast<MsgConnectionSuccess*>(m)->userID();
+    config.factory->freeMessage(m);
     return true;
 }
 
