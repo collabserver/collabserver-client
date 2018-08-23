@@ -26,12 +26,10 @@ include_directories("${CMAKE_SOURCE_DIR}/gitmodules/collab-common/include")
 
 file(GLOB_RECURSE srcFiles ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
-add_library(collabclient STATIC ${srcFiles})
-add_dependencies(collabclient collab-data-crdts)
+add_library(collabclient STATIC $<TARGET_OBJECTS:collabcommon> ${srcFiles})
 add_dependencies(collabclient collab-common)
+add_dependencies(collabclient collab-data-crdts)
 add_custom_target(buildClient collabclient)
-
-target_link_libraries(collabclient collabcommon collabdata zmq)
 
 
 # ------------------------------------------------------------------------------
@@ -42,6 +40,7 @@ option(collab_examples "Build examples" OFF)
 if(collab_examples)
     message(STATUS Build examples)
     add_executable(exampleClient examples/exampleClient.cpp)
-    target_link_libraries(exampleClient collabclient)
+    add_dependencies(exampleClient collabclient)
+    target_link_libraries(exampleClient collabclient collabdata zmq)
     add_custom_target(runExampleClient exampleClient)
 endif()

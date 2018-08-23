@@ -11,7 +11,9 @@ ExternalProject_Add(collab-common
     CMAKE_ARGS          "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
 )
 
-add_library(collabcommon STATIC IMPORTED)
+add_library(collabcommon OBJECT IMPORTED)
 ExternalProject_Get_Property(collab-common BINARY_DIR)
-set_property(TARGET collabcommon
-    PROPERTY IMPORTED_LOCATION "${BINARY_DIR}/libcollabcommon.a")
+file(GLOB_RECURSE ofiles "${BINARY_DIR}CMakeFiles/collabcommon.dir/src/*.o")
+set_property(TARGET collabcommon PROPERTY IMPORTED_OBJECTS ${ofiles})
+
+
