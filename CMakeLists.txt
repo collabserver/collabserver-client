@@ -24,13 +24,21 @@ include_directories("${CMAKE_SOURCE_DIR}/include")
 include_directories("${CMAKE_SOURCE_DIR}/gitmodules/collab-data-crdts/include")
 include_directories("${CMAKE_SOURCE_DIR}/gitmodules/collab-common/include")
 
-file(GLOB_RECURSE srcFiles ${CMAKE_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE srcFiles "${CMAKE_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE srcComFiles "${collab_gitmodule_dir}/collab-common/src/*.cpp")
 
-add_library(collabclient STATIC $<TARGET_OBJECTS:collabcommon> ${srcFiles})
+# DEV NOTE (About collab-common compilation here)
+# Due to some really strange issue, probably CMake caching order
+# and order the set_property for collab-common is done, the
+# $<TARGET_OBJECT:collabcommon> is empty. You should re-call cmake ..
+# a second time to have the value cached. I don't manage to fix this a proper
+# way. I instead recompile straight from srcComFiles but it was not mean
+# to be like this originally.
+
+#add_library(collabclient STATIC $<TARGET_OBJECTS:collabcommon> ${srcFiles})
+add_library(collabclient STATIC ${srcComFiles} ${srcFiles})
 add_dependencies(collabclient collab-common)
 add_dependencies(collabclient collab-data-crdts)
-add_custom_target(buildClient collabclient)
-target_link_libraries(collabclient $<TARGET_OBJECTS:collabcommon>)
 
 
 # ------------------------------------------------------------------------------
