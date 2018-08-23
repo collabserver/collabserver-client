@@ -24,21 +24,12 @@ include_directories("${CMAKE_SOURCE_DIR}/include")
 include_directories("${CMAKE_SOURCE_DIR}/gitmodules/collab-data-crdts/include")
 include_directories("${CMAKE_SOURCE_DIR}/gitmodules/collab-common/include")
 
-file(GLOB_RECURSE srcFiles "${CMAKE_SOURCE_DIR}/src/*.cpp")
-file(GLOB_RECURSE srcComFiles "${collab_gitmodule_dir}/collab-common/src/*.cpp")
+file(GLOB_RECURSE srcFiles ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
-# DEV NOTE (About collab-common compilation here)
-# Due to some really strange issue, probably CMake caching order
-# and order the set_property for collab-common is done, the
-# $<TARGET_OBJECT:collabcommon> is empty. You should re-call cmake ..
-# a second time to have the value cached. I don't manage to fix this a proper
-# way. I instead recompile straight from srcComFiles but it was not mean
-# to be like this originally.
-
-#add_library(collabclient STATIC $<TARGET_OBJECTS:collabcommon> ${srcFiles})
-add_library(collabclient STATIC ${srcComFiles} ${srcFiles})
-add_dependencies(collabclient collab-common)
+add_library(collabclient STATIC ${srcFiles})
 add_dependencies(collabclient collab-data-crdts)
+add_dependencies(collabclient collab-common)
+add_custom_target(buildClient collabclient)
 
 
 # ------------------------------------------------------------------------------
@@ -49,7 +40,6 @@ option(collab_examples "Build examples" OFF)
 if(collab_examples)
     message(STATUS Build examples)
     add_executable(exampleClient examples/exampleClient.cpp)
-    add_dependencies(exampleClient collabclient)
-    target_link_libraries(exampleClient collabclient collabdata zmq)
+    target_link_libraries(exampleClient collabclient collabcommon zmq)
     add_custom_target(runExampleClient exampleClient)
 endif()
