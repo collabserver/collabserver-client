@@ -30,6 +30,7 @@ add_library(collabclient STATIC $<TARGET_OBJECTS:collabcommon> ${srcFiles})
 add_dependencies(collabclient collab-common)
 add_dependencies(collabclient collab-data-crdts)
 add_custom_target(buildClient collabclient)
+target_link_libraries(collabclient $<TARGET_OBJECTS:collabcommon>)
 
 
 # ------------------------------------------------------------------------------
