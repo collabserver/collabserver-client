@@ -1,7 +1,7 @@
 # Perso add
 build/
-bin/
 dependencies/
+doc/
 .ycm_extra_conf.py
 
 
