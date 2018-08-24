@@ -86,7 +86,7 @@ bool Client::disconnect() {
 
 bool Client::createDataVolatile(CollabData* data) {
     assert(data != nullptr);
-    if(!this->isConnected() || !this->isDataLoaded()) {
+    if(!this->isConnected() || this->isDataLoaded()) {
         return false;
     }
 
@@ -115,7 +115,7 @@ bool Client::createDataVolatile(CollabData* data) {
 bool Client::joinData(CollabData* data, int dataID) {
     assert(data != nullptr);
     assert(dataID > -1);
-    if(!this->isConnected() || !this->isDataLoaded()) {
+    if(!this->isConnected() || this->isDataLoaded()) {
         return false;
     }
 
