@@ -17,7 +17,6 @@ static MessageFactory& msgFactory = MessageFactory::getInstance();
 Client::Client() {
     ZMQSocketConfig config = {
         ZMQ_REQ,
-        &g_context,
         &(MessageFactory::getInstance())
     };
     local_socket = new ZMQSocket(config);
