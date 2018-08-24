@@ -16,8 +16,6 @@ class Client {
     private:
         CollabData* _data               = nullptr;
         int         _dataID             = -1;
-        int         _dataTypeID         = -1;
-        int         _nbCollaborators    = -1;
         int         _userID             = -1;
 
     public:
@@ -59,25 +57,32 @@ class Client {
          * Creates new collaborative data on server and join it.
          * Data is volatile on server and won't be saved on a database.
          * Do nothing if another data is already loaded (And returns false).
-         *
-         * Current dataID is set with the ID server gave to this collab data.
-         * You may share this ID with other in order to join the collaboration.
-         *
          * This methods wait and block until server answers.
          *
-         * \param dataTypeID Type of data to create (See server registered data)
+         * \warning
+         * Data is you actual implementation of CollabData.
+         * Don't do any operations on it before calling this function, 
+         * otherwise, these changes won't be broadcasted to others.
+         *
+         * \param data Pointer to your local data instance.
          * \return True if successfully created, otherwise, return false.
          */
-        bool createDataVolatile(int dataTypeID);
+        bool createDataVolatile(CollabData* data);
 
         /**
          * Join a collab data already started on server side.
          * Data ID is attributed by the server. You may get it from its owner.
          *
+         * \warning
+         * Data is you actual implementation of CollabData.
+         * Don't do any operations on it before calling this function, 
+         * otherwise, these changes won't be broadcasted to others.
+         *
+         * \param data Pointer to your local data instance.
          * \param dataID Unique ID of the data on server.
          * \return True if successfully joined, otherwise, return false.
          */
-        bool joinData(int dataID);
+        bool joinData(CollabData* data, int dataID);
 
         /**
          * Leave the current data collaboration.
@@ -93,7 +98,7 @@ class Client {
          *
          * \return True if data loaded, otherwise, return false.
          */
-        bool isDataLoaded() const { return _data != nullptr; }
+        bool isDataLoaded() const { return _dataID != -1; }
 
 
     // ---------------------------------------------------------------------
@@ -101,10 +106,7 @@ class Client {
     // ---------------------------------------------------------------------
 
     public:
-        int getNbCollaborators() const { return _nbCollaborators; }
         int getDataID() const { return _dataID; }
-        int getDataTypeID() const { return _dataTypeID; }
-        CollabData* getCollabData() { return _data; }
 };
 
 
