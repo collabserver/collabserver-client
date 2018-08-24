@@ -21,16 +21,20 @@ Client::Client() {
         &(MessageFactory::getInstance())
     };
     local_socket = new ZMQSocket(config);
+    /*
     assert(local_socket != nullptr);
+    */
 }
 
 Client::~Client() {
+    /*
     this->leaveData();
     this->disconnect();
 
     assert(local_socket != nullptr);
     delete local_socket;
     local_socket = nullptr;
+    */
 }
 
 bool Client::connect(const char* ip, const int port, const float timeout) {

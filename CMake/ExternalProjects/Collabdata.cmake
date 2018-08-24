@@ -17,4 +17,3 @@ set_property(TARGET collabdata
     PROPERTY IMPORTED_LOCATION "${BINARY_DIR}/libcollabdata.a")
 
 
-
