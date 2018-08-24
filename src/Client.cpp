@@ -63,9 +63,9 @@ bool Client::disconnect() {
 
     if(this->isConnected()) {
         // TODO leave server
+        local_socket->disconnect();
     }
 
-    local_socket->disconnect(); // TODO if zmq not connect, I'm not sure if this works
     return true;
 }
 
