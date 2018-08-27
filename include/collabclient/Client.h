@@ -55,19 +55,18 @@ class Client {
 
         /**
          * Creates new collaborative data on server and join it.
-         * Data is volatile on server and won't be saved on a database.
          * Do nothing if another data is already loaded (And returns false).
          * This methods wait and block until server answers.
          *
          * \warning
-         * Data is you actual implementation of CollabData.
-         * Don't do any operations on it before calling this function, 
+         * Data is your actual implementation of CollabData.
+         * Don't do any operations on it before calling this function,
          * otherwise, these changes won't be broadcasted to others.
          *
          * \param data Pointer to your local data instance.
          * \return True if successfully created, otherwise, return false.
          */
-        bool createDataVolatile(CollabData* data);
+        bool createData(CollabData* data);
 
         /**
          * Join a collab data already started on server side.
