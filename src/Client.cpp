@@ -91,19 +91,19 @@ bool Client::createData(CollabData* data) {
     }
 
     Message* m;
-    m = msgFactory.newMessage(MessageFactory::MSG_CREA_DATA_VOLATILE_REQUEST);
-    static_cast<MsgCreaDataVolatileRequest*>(m)->setUserID(_userID);
+    m = msgFactory.newMessage(MessageFactory::MSG_CREA_DATA_REQUEST);
+    static_cast<MsgCreaDataRequest*>(m)->setUserID(_userID);
     local_socket->sendMessage(*m);
     msgFactory.freeMessage(m);
 
     m = local_socket->receiveMessage();
-    if(m->getType() != MessageFactory::MSG_CREA_DATA_VOLATILE_SUCCESS) {
+    if(m->getType() != MessageFactory::MSG_CREA_DATA_SUCCESS) {
         msgFactory.freeMessage(m);
         return false;
     }
 
     _data = data;
-    _dataID = static_cast<MsgCreaDataVolatileSuccess*>(m)->getDataID();
+    _dataID = static_cast<MsgCreaDataSuccess*>(m)->getDataID();
     msgFactory.freeMessage(m);
 
     assert(_data != nullptr);
