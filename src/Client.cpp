@@ -172,6 +172,7 @@ bool Client::isUgly() const {
     }
 
     Message* m = msgFactory.newMessage(MessageFactory::MSG_UGLY);
+    static_cast<MsgUgly*>(m)->setUserID(_userID);
     local_socket->sendMessage(*m);
     msgFactory.freeMessage(m);
 
