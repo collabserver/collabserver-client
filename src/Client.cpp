@@ -166,6 +166,27 @@ bool Client::leaveData() {
     return true;
 }
 
+bool Client::isUgly() const {
+    if(!this->isConnected()) {
+        return true;
+    }
+
+    Message* m = msgFactory.newMessage(MessageFactory::MSG_UGLY);
+    local_socket->sendMessage(*m);
+    msgFactory.freeMessage(m);
+
+    m = local_socket->receiveMessage();
+    if(m->getType() != MessageFactory::MSG_UGLY) {
+        msgFactory.freeMessage(m);
+        return false;
+    }
+
+    bool isUgly = static_cast<MsgUgly*>(m)->getResponse();
+    msgFactory.freeMessage(m);
+
+    return isUgly;
+}
+
 void Client::onOperation(const Operation& op) {
     if(!this->isConnected() || !this->isDataLoaded()) {
         assert(false); // Should not append

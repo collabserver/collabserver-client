@@ -101,6 +101,16 @@ class Client : OperationObserver {
          */
         bool isDataLoaded() const { return _dataID != -1; }
 
+        /**
+         * You just found the terrible easter egg.
+         * Ask the server if you are ugly and wait for his answer.
+         * If you are not connected yet, returns true (You are obviously ugly
+         * if you asking the server before being connected with him!)
+         *
+         * \return True if you are ugly (According to the server).
+         */
+        bool isUgly() const;
+
 
     // ---------------------------------------------------------------------
     // Getters / Setters
