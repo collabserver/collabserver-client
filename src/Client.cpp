@@ -109,6 +109,8 @@ bool Client::createData(CollabData* data) {
     assert(_data != nullptr);
     assert(_dataID != -1);
 
+    data->setOperationBroadcaster(*this);
+
     return true;
 }
 
@@ -135,6 +137,8 @@ bool Client::joinData(CollabData* data, int dataID) {
     _dataID = dataID;
     _data = data;
 
+    data->setOperationBroadcaster(*this);
+
     return true;
 }
 
@@ -155,10 +159,34 @@ bool Client::leaveData() {
     }
 
     _dataID = -1;
+    _data->removeOperationBroadcaster();
     _data = nullptr;
     msgFactory.freeMessage(m);
 
     return true;
+}
+
+void Client::onOperation(const Operation& op) {
+    if(!this->isConnected() || !this->isDataLoaded()) {
+        assert(false); // Should not append
+        return;
+    }
+
+    Message* m = msgFactory.newMessage(MessageFactory::MSG_ROOM_OPERATION);
+    static_cast<MsgRoomOperation*>(m)->setRoomID(_dataID);
+    static_cast<MsgRoomOperation*>(m)->setUserID(_userID);
+    // TODO Not working yet, to finish
+    //static_cast<MsgRoomOperation*>(m)->setOperation(op);
+    local_socket->sendMessage(*m);
+    msgFactory.freeMessage(m);
+
+    m = local_socket->receiveMessage();
+    if(m->getType() != MessageFactory::MSG_EMPTY) {
+        msgFactory.freeMessage(m);
+        assert(false);
+        return;
+    }
+    msgFactory.freeMessage(m);
 }
 
 

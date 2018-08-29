@@ -1,6 +1,8 @@
 #pragma once
 
 #include "collabdata/custom/CollabData.h"
+#include "collabdata/custom/Operation.h"
+#include "collabdata/custom/OperationObserver.h"
 
 namespace collab {
 
@@ -12,7 +14,7 @@ namespace collab {
  * Module to connect a remote CollabServer and work on a CollabData.
  * Only one CollabData can be active at the same time.
  */
-class Client {
+class Client : OperationObserver {
     private:
         CollabData* _data               = nullptr;
         int         _dataID             = -1;
@@ -106,6 +108,14 @@ class Client {
 
     public:
         int getDataID() const { return _dataID; }
+
+
+    // ---------------------------------------------------------------------
+    // OperationObserver overrides
+    // ---------------------------------------------------------------------
+
+    public:
+        void onOperation(const Operation& op) override;
 };
 
 
