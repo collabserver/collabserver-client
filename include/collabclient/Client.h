@@ -30,6 +30,7 @@ class Client : OperationObserver {
          * Try to open connection with the remote server.
          * Connection tentative may be timed out if timeout is set.
          * (Infinite timeout if value equal or inferior to 0)
+         * Block until server responds.
          *
          * \bug
          * timeout not implemented yet
@@ -43,6 +44,7 @@ class Client : OperationObserver {
 
         /**
          * Stop connection with remove server.
+         * Block until server responds.
          *
          * \return True if successfully disconnected, otherwise, return false
          */
@@ -59,6 +61,7 @@ class Client : OperationObserver {
          * Creates new collaborative data on server and join it.
          * Do nothing if another data is already loaded (And returns false).
          * This methods wait and block until server answers.
+         * Block until server responds.
          *
          * \warning
          * Data is your actual implementation of CollabData.
@@ -73,6 +76,7 @@ class Client : OperationObserver {
         /**
          * Join a collab data already started on server side.
          * Data ID is attributed by the server. You may get it from its owner.
+         * Block until server responds.
          *
          * \warning
          * Data is you actual implementation of CollabData.
@@ -88,6 +92,7 @@ class Client : OperationObserver {
         /**
          * Leave the current data collaboration.
          * Does nothing if no data already loaded.
+         * Block until server responds.
          *
          * \return True if successfully left, otherwise, return false.
          */
@@ -106,6 +111,7 @@ class Client : OperationObserver {
          * Ask the server if you are ugly and wait for his answer.
          * If you are not connected yet, returns true (You are obviously ugly
          * if you asking the server before being connected with him!)
+         * Block until server responds.
          *
          * \return True if you are ugly (According to the server).
          */
@@ -117,6 +123,13 @@ class Client : OperationObserver {
     // ---------------------------------------------------------------------
 
     public:
+
+        /**
+         * Get the current collab data ID.
+         * This is the common ID to identify the data on the collab server.
+         *
+         * \return ID of the data in collab server.
+         */
         int getDataID() const { return _dataID; }
 
 
@@ -124,7 +137,12 @@ class Client : OperationObserver {
     // OperationObserver overrides
     // ---------------------------------------------------------------------
 
-    public:
+    private:
+
+        /**
+         * On operation applied locally, broadcast it to others.
+         * This is an internal method (Private).
+         */
         void onOperation(const Operation& op) override;
 };
 
