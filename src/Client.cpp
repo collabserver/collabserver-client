@@ -195,8 +195,8 @@ void Client::onOperation(const Operation& op) {
     }
 
     Message* m = msgFactory.newMessage(MessageFactory::MSG_ROOM_OPERATION);
-    static_cast<MsgRoomOperation*>(m)->setRoomID(_dataID);
     static_cast<MsgRoomOperation*>(m)->setUserID(_userID);
+    static_cast<MsgRoomOperation*>(m)->setRoomID(_dataID);
     // TODO Not working yet, to finish
     //static_cast<MsgRoomOperation*>(m)->setOperation(op);
     local_socket->sendMessage(*m);
