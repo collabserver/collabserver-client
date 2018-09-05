@@ -34,10 +34,11 @@ static void listenSocketSUB(CollabData* data) {
         }
         assert(data != nullptr);
 
-        std::stringstream opBuffer;
-        opBuffer.str(static_cast<MsgRoomOperation*>(m)->getOperationBuffer());
-
-        data->applyExternOperation(opBuffer);
+        // TODO Add userID and roomID check etc
+        MsgRoomOperation* msg = static_cast<MsgRoomOperation*>(m);
+        int operationID = msg->getOpTypeID();
+        const std::string& buffer = msg->getOperationBuffer();
+        data->applyExternOperation(operationID, buffer);
 
         l_msgFactory.freeMessage(m);
     }
@@ -66,6 +67,7 @@ static void stopThreadSUB() {
     l_isListeningSUB = false;
     // TODO: this actuall won't stop the current locked receiveMessage!
     // Panda! You need to figure out how to interrup this function.
+    // For now, we will probably get a segfault or some horrible things like this.
 }
 
 
@@ -271,13 +273,14 @@ void Client::onOperation(const Operation& op) {
         return;
     }
 
-    Message* m = l_msgFactory.newMessage(MessageFactory::MSG_ROOM_OPERATION);
-    static_cast<MsgRoomOperation*>(m)->setUserID(_userID);
-    static_cast<MsgRoomOperation*>(m)->setRoomID(_dataID);
-
     std::stringstream opBuffer;
     op.serialize(opBuffer);
-    static_cast<MsgRoomOperation*>(m)->getOperationBuffer() = opBuffer.str();
+
+    Message* m = l_msgFactory.newMessage(MessageFactory::MSG_ROOM_OPERATION);
+    static_cast<MsgRoomOperation*>(m)->setRoomID(_dataID);
+    static_cast<MsgRoomOperation*>(m)->setUserID(_userID);
+    static_cast<MsgRoomOperation*>(m)->setOpTypeID(op.getType());
+    static_cast<MsgRoomOperation*>(m)->setOperationBuffer(opBuffer.str());
 
     l_socketREQ->sendMessage(*m);
     l_msgFactory.freeMessage(m);
