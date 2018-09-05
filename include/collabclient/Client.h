@@ -28,19 +28,13 @@ class Client : OperationObserver {
 
         /**
          * Try to open connection with the remote server.
-         * Connection tentative may be timed out if timeout is set.
-         * (Infinite timeout if value equal or inferior to 0)
          * Block until server responds.
-         *
-         * \bug
-         * timeout not implemented yet
          *
          * \param ip        IP of the remove server.
          * \param port      Port of the remove server.
-         * \param timeout   Connection timeout in seconds.
          * \return True if successfully connected, otherwise, return false
          */
-        bool connect(const char* ip, const int port, const float timeout = 0.0f);
+        bool connect(const char* ip, const int port);
 
         /**
          * Stop connection with remove server.

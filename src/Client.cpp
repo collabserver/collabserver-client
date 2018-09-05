@@ -2,12 +2,15 @@
 
 #include <cassert>
 #include <thread>
-#include <sstream> // For operation buffer
+#include <string> // For operation buffer
+#include <sstream>
+#include <zmq.hpp> // For ZMQ socket options
 
 #include "collabcommon/messaging/MessageFactory.h"
 #include "collabcommon/messaging/Message.h"
 #include "collabcommon/messaging/MessageList.h"
 #include "collabcommon/network/ZMQSocket.h"
+#include "collabcommon/utils/constants.h"
 
 namespace collab {
 
@@ -30,9 +33,12 @@ static void listenSocketSUB(CollabData* data) {
             continue;
         }
         assert(data != nullptr);
-        std::stringstream&
-            buffer = static_cast<MsgRoomOperation*>(m)->getOperationBuffer();
-        data->applyExternOperation(buffer);
+
+        std::stringstream opBuffer;
+        opBuffer.str(static_cast<MsgRoomOperation*>(m)->getOperationBuffer());
+
+        data->applyExternOperation(opBuffer);
+
         l_msgFactory.freeMessage(m);
     }
 }
@@ -40,7 +46,15 @@ static void listenSocketSUB(CollabData* data) {
 // Run the thread that listen to any operation comming from others over network.
 static void startThreadSUB(int dataID, CollabData* data) {
     assert(l_isListeningSUB == false);
+    assert(l_socketSUB != nullptr);
     assert(data != nullptr);
+
+    // TODO tmp (Accept everything for now)
+    // TODO: Check if the subscribe actually work (I'm not sure).
+    // Unsubscribe all previous subsciption
+    const char* filter = "";
+    l_socketSUB->setsockopt(ZMQ_UNSUBSCRIBE, "", strlen(""));
+    l_socketSUB->setsockopt(ZMQ_SUBSCRIBE, filter, strlen(filter));
 
     if(l_isListeningSUB == true) { return; }
     l_isListeningSUB = true;
@@ -79,9 +93,13 @@ Client::~Client() {
     l_socketSUB = nullptr;
 }
 
-bool Client::connect(const char* ip, const int port, const float timeout) {
+bool Client::connect(const char* ip, const int port) {
+    assert(l_socketREQ != nullptr);
+    assert(l_socketSUB != nullptr);
+
     if(this->isConnected()) { return false; }
     l_socketREQ->connect(ip, port);
+    l_socketSUB->connect(ip, COLLAB_SOCKET_SUB_PORT);
 
     Message* m = l_msgFactory.newMessage(MessageFactory::MSG_CONNECTION_REQUEST);
     assert(m != nullptr);
@@ -104,6 +122,7 @@ bool Client::connect(const char* ip, const int port, const float timeout) {
 
 bool Client::disconnect() {
     assert(l_socketREQ != nullptr);
+    assert(l_socketSUB != nullptr);
 
     if(this->isDataLoaded()) {
         this->leaveData();
@@ -129,6 +148,7 @@ bool Client::disconnect() {
     l_msgFactory.freeMessage(m);
 
     l_socketREQ->disconnect();
+    l_socketSUB->disconnect();
 
     return true;
 }
@@ -211,6 +231,7 @@ bool Client::leaveData() {
     }
 
     stopThreadSUB();
+
     _dataID = -1;
     _data->removeOperationBroadcaster();
     _data = nullptr;
@@ -243,9 +264,10 @@ bool Client::isUgly() const {
     return isUgly;
 }
 
+// DevNote: remind: this is for op done by the local user.
 void Client::onOperation(const Operation& op) {
     if(!this->isConnected() || !this->isDataLoaded()) {
-        assert(false); // Should not append
+        assert(false); // Should not append (Internal error)
         return;
     }
 
@@ -253,9 +275,9 @@ void Client::onOperation(const Operation& op) {
     static_cast<MsgRoomOperation*>(m)->setUserID(_userID);
     static_cast<MsgRoomOperation*>(m)->setRoomID(_dataID);
 
-    std::stringstream&
-        buffer = static_cast<MsgRoomOperation*>(m)->getOperationBuffer();
-    op.serialize(buffer);
+    std::stringstream opBuffer;
+    op.serialize(opBuffer);
+    static_cast<MsgRoomOperation*>(m)->getOperationBuffer() = opBuffer.str();
 
     l_socketREQ->sendMessage(*m);
     l_msgFactory.freeMessage(m);
