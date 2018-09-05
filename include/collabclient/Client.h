@@ -142,6 +142,8 @@ class Client : OperationObserver {
         /**
          * On operation applied locally, broadcast it to others.
          * This is an internal method (Private).
+         *
+         * \param op Operation to broadcast.
          */
         void onOperation(const Operation& op) override;
 };

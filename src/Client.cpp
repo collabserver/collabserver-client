@@ -10,38 +10,45 @@
 namespace collab {
 
 
-static ZMQSocket* local_socket = nullptr;
+static ZMQSocket* local_socketREQ = nullptr;
+static ZMQSocket* local_socketSUB = nullptr;
 static MessageFactory& msgFactory = MessageFactory::getInstance();
 
 
 Client::Client() {
-    ZMQSocketConfig config = {
-        ZMQ_REQ,
-        &(MessageFactory::getInstance())
-    };
-    local_socket = new ZMQSocket(config);
-    assert(local_socket != nullptr);
+    ZMQSocketConfig configREQ = { ZMQ_REQ, &(MessageFactory::getInstance()) };
+    ZMQSocketConfig configSUB = { ZMQ_SUB, &(MessageFactory::getInstance()) };
+
+    local_socketREQ = new ZMQSocket(configREQ);
+    local_socketSUB = new ZMQSocket(configSUB);
+
+    assert(local_socketREQ != nullptr);
+    assert(local_socketSUB != nullptr);
 }
 
 Client::~Client() {
+    assert(local_socketREQ != nullptr);
+    assert(local_socketSUB != nullptr);
+
     this->leaveData();
     this->disconnect();
 
-    assert(local_socket != nullptr);
-    delete local_socket;
-    local_socket = nullptr;
+    delete local_socketREQ;
+    delete local_socketSUB;
+    local_socketREQ = nullptr;
+    local_socketSUB = nullptr;
 }
 
 bool Client::connect(const char* ip, const int port, const float timeout) {
     if(this->isConnected()) { return false; }
-    local_socket->connect(ip, port);
+    local_socketREQ->connect(ip, port);
 
     Message* m = msgFactory.newMessage(MessageFactory::MSG_CONNECTION_REQUEST);
     assert(m != nullptr);
-    local_socket->sendMessage(*m);
+    local_socketREQ->sendMessage(*m);
     msgFactory.freeMessage(m);
 
-    m = local_socket->receiveMessage();
+    m = local_socketREQ->receiveMessage();
     if(m->getType() != MessageFactory::MSG_CONNECTION_SUCCESS) {
         msgFactory.freeMessage(m);
         this->disconnect();
@@ -55,7 +62,7 @@ bool Client::connect(const char* ip, const int port, const float timeout) {
 }
 
 bool Client::disconnect() {
-    assert(local_socket != nullptr);
+    assert(local_socketREQ != nullptr);
 
     if(this->isDataLoaded()) {
         this->leaveData();
@@ -67,10 +74,10 @@ bool Client::disconnect() {
 
     Message* m = msgFactory.newMessage(MessageFactory::MSG_DISCONNECT_REQUEST);
     static_cast<MsgDisconnectRequest*>(m)->setUserID(_userID);
-    local_socket->sendMessage(*m);
+    local_socketREQ->sendMessage(*m);
     msgFactory.freeMessage(m);
 
-    m = local_socket->receiveMessage();
+    m = local_socketREQ->receiveMessage();
     if(m->getType() != MessageFactory::MSG_DISCONNECT_SUCCESS) {
         msgFactory.freeMessage(m);
         return false;
@@ -79,7 +86,7 @@ bool Client::disconnect() {
     _userID = -1;
     msgFactory.freeMessage(m);
 
-    local_socket->disconnect();
+    local_socketREQ->disconnect();
 
     return true;
 }
@@ -90,13 +97,12 @@ bool Client::createData(CollabData* data) {
         return false;
     }
 
-    Message* m;
-    m = msgFactory.newMessage(MessageFactory::MSG_CREA_DATA_REQUEST);
+    Message* m = msgFactory.newMessage(MessageFactory::MSG_CREA_DATA_REQUEST);
     static_cast<MsgCreaDataRequest*>(m)->setUserID(_userID);
-    local_socket->sendMessage(*m);
+    local_socketREQ->sendMessage(*m);
     msgFactory.freeMessage(m);
 
-    m = local_socket->receiveMessage();
+    m = local_socketREQ->receiveMessage();
     if(m->getType() != MessageFactory::MSG_CREA_DATA_SUCCESS) {
         msgFactory.freeMessage(m);
         return false;
@@ -124,10 +130,10 @@ bool Client::joinData(CollabData* data, int dataID) {
     Message* m = msgFactory.newMessage(MessageFactory::MSG_JOIN_DATA_REQUEST);
     static_cast<MsgJoinDataRequest*>(m)->setUserID(_userID);
     static_cast<MsgJoinDataRequest*>(m)->setDataID(dataID);
-    local_socket->sendMessage(*m);
+    local_socketREQ->sendMessage(*m);
     msgFactory.freeMessage(m);
 
-    m = local_socket->receiveMessage();
+    m = local_socketREQ->receiveMessage();
     if(m->getType() != MessageFactory::MSG_JOIN_DATA_SUCCESS) {
         msgFactory.freeMessage(m);
         return false;
@@ -149,10 +155,10 @@ bool Client::leaveData() {
 
     Message* m = msgFactory.newMessage(MessageFactory::MSG_LEAVE_DATA_REQUEST);
     static_cast<MsgLeaveDataRequest*>(m)->setUserID(_userID);
-    local_socket->sendMessage(*m);
+    local_socketREQ->sendMessage(*m);
     msgFactory.freeMessage(m);
 
-    m = local_socket->receiveMessage();
+    m = local_socketREQ->receiveMessage();
     if(m->getType() != MessageFactory::MSG_LEAVE_DATA_SUCCESS) {
         msgFactory.freeMessage(m);
         return false;
@@ -173,10 +179,10 @@ bool Client::isUgly() const {
 
     Message* m = msgFactory.newMessage(MessageFactory::MSG_UGLY);
     static_cast<MsgUgly*>(m)->setUserID(_userID);
-    local_socket->sendMessage(*m);
+    local_socketREQ->sendMessage(*m);
     msgFactory.freeMessage(m);
 
-    m = local_socket->receiveMessage();
+    m = local_socketREQ->receiveMessage();
     if(m->getType() != MessageFactory::MSG_UGLY) {
         msgFactory.freeMessage(m);
         return false;
@@ -199,10 +205,10 @@ void Client::onOperation(const Operation& op) {
     static_cast<MsgRoomOperation*>(m)->setRoomID(_dataID);
     // TODO Not working yet, to finish
     //static_cast<MsgRoomOperation*>(m)->setOperation(op);
-    local_socket->sendMessage(*m);
+    local_socketREQ->sendMessage(*m);
     msgFactory.freeMessage(m);
 
-    m = local_socket->receiveMessage();
+    m = local_socketREQ->receiveMessage();
     if(m->getType() != MessageFactory::MSG_EMPTY) {
         msgFactory.freeMessage(m);
         assert(false);
