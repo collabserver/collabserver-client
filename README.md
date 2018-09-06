@@ -10,7 +10,7 @@
 
 
 ## Overview
-> Work in progress.
+End user interface to connect with a CollabServer.
 
 
 ## Requirements
@@ -26,15 +26,15 @@
 > script and placed in *dependencies* folder.
 > Others must be installed manually (Generally system-wide install).
 - [ZeroMQ](http://zeromq.org/) (**Must be installed system-wide**)
-- [collab-common](https://github.com/CollabServer/collab-common.git) (CMake)
-- [collab-data-crdts](https://github.com/CollabServer/collab-data-crdts.git) (CMake)
+- [collab-common](https://github.com/CollabServer/collab-common.git) (CMake. Git submodule)
+- [collab-data-crdts](https://github.com/CollabServer/collab-data-crdts.git) (CMake. Git submodule)
 - [GoogleTest](https://github.com/google/googletest) (CMake. Only for tests)
 
 
 ## Build instructions
 Client interface is built as a static library.
-You must link the library `collabclient` and its dependencies
-`collabcommon` and `zmq`.
+If built manually, you must also include `collab-data-crdts/include` and
+`collab-common/include` headers.
 
 ### Build types
 - CMake build types (ex: `-DCMAKE_BUILD_TYPE=Debug`):
@@ -56,7 +56,6 @@ git submodule update
 
 ### Build static lib with CMake
 ```bash
-# Build manually
 mkdir build
 cd build
 cmake ..
@@ -75,6 +74,14 @@ make runTests
 # Build from shell script
 ./build.sh
 ```
+
+
+## Getting Started
+collab-client is built as a static lib.
+In order to use it in your project, you must also link its dependencies
+`collabcommon`, `zmq` and, `pthread`.
+If you are using the custom component of collab-data-crdts, you must also
+link `collabdata`.
 
 
 ## Generate documentation
