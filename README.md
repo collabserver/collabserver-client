@@ -10,7 +10,7 @@
 
 
 ## Overview
-End user interface to connect with a CollabServer.
+End-user interface to connect with a CollabServer.
 
 
 ## Requirements
@@ -33,8 +33,8 @@ End user interface to connect with a CollabServer.
 
 ## Build instructions
 Client interface is built as a static library.
-If built manually, you must also include `collab-data-crdts/include` and
-`collab-common/include` headers.
+If built the static lib manually, you must also include `collab-data-crdts/include`
+and `collab-common/include` headers.
 
 ### Build types
 - CMake build types (ex: `-DCMAKE_BUILD_TYPE=Debug`):
@@ -42,6 +42,10 @@ If built manually, you must also include `collab-data-crdts/include` and
     - Release
     - RelWithDebInfo
     - MinSizeRel
+
+### CMake options
+- collab_tests (ON/OFF): Build unit tests
+- collab_examples (ON/OFF): Build example
 
 ### Clone project with submodules
 ```bash
@@ -79,7 +83,7 @@ make runTests
 ## Getting Started
 collab-client is built as a static lib.
 In order to use it in your project, you must also link its dependencies
-`collabcommon`, `zmq` and, `pthread`.
+`collabcommon`, `zmq` and, `pthread` in your executable.
 If you are using the custom component of collab-data-crdts, you must also
 link `collabdata`.
 
