@@ -32,6 +32,7 @@ add_custom_target(buildClient collabclient)
 # Examples
 # ------------------------------------------------------------------------------
 option(collab_examples "Build examples" OFF)
+
 if(collab_examples)
     message(STATUS "Build examples")
 
@@ -50,6 +51,7 @@ endif()
 # Tests
 # ------------------------------------------------------------------------------
 option(collab_tests "Build tests" OFF)
+
 if(collab_tests)
     message(STATUS "Build tests")
     enable_testing()
@@ -64,7 +66,7 @@ if(collab_tests)
     add_executable(tests ${srcFilesTests})
     add_test(NAME googletests COMMAND tests)
     add_custom_target(runTests tests)
-    target_link_libraries(tests gtest collabclient collabcommon zmq)
+    target_link_libraries(tests gtest collabclient collabcommon zmq pthread)
 endif()
 
 
