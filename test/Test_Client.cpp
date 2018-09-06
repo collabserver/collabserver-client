@@ -7,6 +7,7 @@ namespace collab {
 
 TEST(Client, constructorDestructor) {
     Client client;
+    // TODO
 }
 
 

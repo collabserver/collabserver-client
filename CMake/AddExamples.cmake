@@ -1,3 +1,0 @@
-add_executable(exampleClient examples/exampleClient.cpp)
-target_link_libraries(exampleClient collabclient collabcommon zmq)
-add_custom_target(runExampleClient exampleClient)

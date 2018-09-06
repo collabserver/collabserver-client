@@ -2,8 +2,8 @@
 
 #include <cassert>
 #include <thread>
-#include <string> // For operation buffer
 #include <sstream>
+#include <string> // For operation buffer
 #include <zmq.hpp> // For ZMQ socket options
 
 #include "collabcommon/messaging/MessageFactory.h"
@@ -28,19 +28,19 @@ static void listenSocketSUB(CollabData* data) {
     assert(l_isListeningSUB == true);
 
     while(l_isListeningSUB) {
-        Message* m = l_socketSUB->receiveMessage();
-        if(m->getType() != MessageFactory::MSG_ROOM_OPERATION) {
+        Message* received = l_socketSUB->receiveMessage();
+        if(received->getType() != MessageFactory::MSG_ROOM_OPERATION) {
             continue;
         }
         assert(data != nullptr);
 
         // TODO Add userID and roomID check etc
-        MsgRoomOperation* msg = static_cast<MsgRoomOperation*>(m);
+        MsgRoomOperation* msg = static_cast<MsgRoomOperation*>(received);
         int operationID = msg->getOpTypeID();
         const std::string& buffer = msg->getOperationBuffer();
         data->applyExternOperation(operationID, buffer);
 
-        l_msgFactory.freeMessage(m);
+        l_msgFactory.freeMessage(received);
     }
 }
 
