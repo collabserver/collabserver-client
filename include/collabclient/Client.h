@@ -16,9 +16,9 @@ namespace collab {
  */
 class Client : OperationObserver {
     private:
-        CollabData* _data               = nullptr;
-        int         _dataID             = -1;
-        int         _userID             = -1;
+        CollabData*  _data      = nullptr;
+        unsigned int _dataID    = 0;
+        unsigned int _userID    = 0;
 
     public:
         Client();
@@ -29,6 +29,10 @@ class Client : OperationObserver {
         /**
          * Try to open connection with the remote server.
          * Block until server responds.
+         *
+         * \todo
+         * There is no timeout for now.
+         * This block indefinitely if no server respond.
          *
          * \param ip        IP of the remove server.
          * \param port      Port of the remove server.
@@ -43,13 +47,6 @@ class Client : OperationObserver {
          * \return True if successfully disconnected, otherwise, return false
          */
         bool disconnect();
-
-        /**
-         * Check whether client is currently connected to a CollabServer.
-         *
-         * \return True if connected, otherwise, return false.
-         */
-        bool isConnected() const { return _userID != -1; }
 
         /**
          * Creates new collaborative data on server and join it.
@@ -73,7 +70,7 @@ class Client : OperationObserver {
          * Block until server responds.
          *
          * \warning
-         * Data is you actual implementation of CollabData.
+         * Data is your actual implementation of CollabData.
          * Don't do any operations on it before calling this function, 
          * otherwise, these changes won't be broadcasted to others.
          *
@@ -81,7 +78,7 @@ class Client : OperationObserver {
          * \param dataID Unique ID of the data on server.
          * \return True if successfully joined, otherwise, return false.
          */
-        bool joinData(CollabData* data, int dataID);
+        bool joinData(CollabData* data, unsigned int dataID);
 
         /**
          * Leave the current data collaboration.
@@ -91,25 +88,6 @@ class Client : OperationObserver {
          * \return True if successfully left, otherwise, return false.
          */
         bool leaveData();
-
-        /**
-         * Check whether a CollabServer data has been loaded.
-         * If no data loaded, this means no collaboration is ongoing.
-         *
-         * \return True if data loaded, otherwise, return false.
-         */
-        bool isDataLoaded() const { return _dataID != -1; }
-
-        /**
-         * You just found the terrible easter egg.
-         * Ask the server if you are ugly and wait for his answer.
-         * If you are not connected yet, returns true (You are obviously ugly
-         * if you asking the server before being connected with him!)
-         * Block until server responds.
-         *
-         * \return True if you are ugly (According to the server).
-         */
-        bool isUgly() const;
 
 
     // ---------------------------------------------------------------------
@@ -124,7 +102,40 @@ class Client : OperationObserver {
          *
          * \return ID of the data in collab server.
          */
-        int getDataID() const { return _dataID; }
+        unsigned int getDataID() const { return _dataID; }
+
+        /**
+         * Get the current user ID as registered in CollabServer
+         *
+         * \return ID of the user
+         */
+        unsigned int getUserID() const { return _userID; }
+
+        /**
+         * Check whether client is currently connected to a CollabServer.
+         *
+         * \return True if connected, otherwise, return false.
+         */
+        bool isConnected() const { return _userID != 0; }
+
+        /**
+         * Check whether a CollabServer data has been loaded.
+         * If no data loaded, this means no collaboration is ongoing.
+         *
+         * \return True if data loaded, otherwise, return false.
+         */
+        bool isDataLoaded() const { return _dataID != 0; }
+
+        /**
+         * You just found the terrible easter egg.
+         * Ask the server if you are ugly and wait for his answer.
+         * If you are not connected yet, returns true (You are obviously ugly
+         * if you asking the server before being connected with him!)
+         * Block until server responds.
+         *
+         * \return True if you are ugly (According to the server).
+         */
+        bool isUgly() const;
 
 
     // ---------------------------------------------------------------------

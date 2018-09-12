@@ -186,7 +186,7 @@ bool Client::createData(CollabData* data) {
     return true;
 }
 
-bool Client::joinData(CollabData* data, int dataID) {
+bool Client::joinData(CollabData* data, unsigned int dataID) {
     assert(data != nullptr);
     assert(dataID > -1);
     if(!this->isConnected() || this->isDataLoaded()) {
