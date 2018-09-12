@@ -145,7 +145,7 @@ bool Client::disconnect() {
         return false;
     }
 
-    _userID = -1;
+    _userID = 0;
 
     l_msgFactory.freeMessage(m);
 
@@ -178,7 +178,7 @@ bool Client::createData(CollabData* data) {
     l_msgFactory.freeMessage(m);
 
     assert(_data != nullptr);
-    assert(_dataID != -1);
+    assert(_dataID != 0);
 
     data->setOperationBroadcaster(*this);
     startThreadSUB(_dataID, _data);
@@ -188,7 +188,7 @@ bool Client::createData(CollabData* data) {
 
 bool Client::joinData(CollabData* data, unsigned int dataID) {
     assert(data != nullptr);
-    assert(dataID > -1);
+    assert(dataID > 0);
     if(!this->isConnected() || this->isDataLoaded()) {
         return false;
     }
@@ -234,7 +234,7 @@ bool Client::leaveData() {
 
     stopThreadSUB();
 
-    _dataID = -1;
+    _dataID = 0;
     _data->removeOperationBroadcaster();
     _data = nullptr;
 
