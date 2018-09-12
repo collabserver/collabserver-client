@@ -22,9 +22,13 @@ static ZMQSocket*       l_socketSUB         = nullptr;
 static MessageFactory&  l_msgFactory        = MessageFactory::getInstance();
 
 
+// -----------------------------------------------------------------------------
+// SUB Socket methods
+// -----------------------------------------------------------------------------
+
 // Listen incoming RoomOperation messages
-static void listenSocketSUB(CollabData* data) {
-    assert(data != nullptr);
+static void listenSocketSUB(Client* client) {
+    assert(client != nullptr);
     assert(l_isListeningSUB == true);
 
     while(l_isListeningSUB) {
@@ -32,23 +36,25 @@ static void listenSocketSUB(CollabData* data) {
         if(received->getType() != MessageFactory::MSG_ROOM_OPERATION) {
             continue;
         }
-        assert(data != nullptr);
 
         // TODO Add userID and roomID check etc
         MsgRoomOperation* msg = static_cast<MsgRoomOperation*>(received);
         int operationID = msg->getOpTypeID();
-        const std::string& buffer = msg->getOperationBuffer();
-        data->applyExternOperation(operationID, buffer);
+        if(msg->getUserID() != client->getUserID()) {
+            const std::string& buffer = msg->getOperationBuffer();
+            assert(client->getData() != nullptr);
+            client->getData()->applyExternOperation(operationID, buffer);
+        }
 
         l_msgFactory.freeMessage(received);
     }
 }
 
 // Run the thread that listen to any operation comming from others over network.
-static void startThreadSUB(int dataID, CollabData* data) {
+static void startThreadSUB(Client* client) {
     assert(l_isListeningSUB == false);
     assert(l_socketSUB != nullptr);
-    assert(data != nullptr);
+    assert(client != nullptr);
 
     // TODO tmp (Accept everything for now)
     // TODO: Check if the subscribe actually work (I'm not sure).
@@ -60,7 +66,7 @@ static void startThreadSUB(int dataID, CollabData* data) {
     if(l_isListeningSUB == true) { return; }
     l_isListeningSUB = true;
 
-    std::thread(listenSocketSUB, data).detach();
+    std::thread(listenSocketSUB, client).detach();
 }
 
 static void stopThreadSUB() {
@@ -70,6 +76,10 @@ static void stopThreadSUB() {
     // For now, we will probably get a segfault or some horrible things like this.
 }
 
+
+// -----------------------------------------------------------------------------
+// Client init
+// -----------------------------------------------------------------------------
 
 Client::Client() {
     ZMQSocketConfig configREQ = { ZMQ_REQ, &(MessageFactory::getInstance()) };
@@ -94,6 +104,11 @@ Client::~Client() {
     l_socketREQ = nullptr;
     l_socketSUB = nullptr;
 }
+
+
+// -----------------------------------------------------------------------------
+// Connection / Disconnect
+// -----------------------------------------------------------------------------
 
 bool Client::connect(const char* ip, const int port) {
     assert(l_socketREQ != nullptr);
@@ -155,6 +170,11 @@ bool Client::disconnect() {
     return true;
 }
 
+
+// -----------------------------------------------------------------------------
+// Data
+// -----------------------------------------------------------------------------
+
 bool Client::createData(CollabData* data) {
     assert(data != nullptr);
     if(!this->isConnected() || this->isDataLoaded()) {
@@ -181,7 +201,7 @@ bool Client::createData(CollabData* data) {
     assert(_dataID != 0);
 
     data->setOperationBroadcaster(*this);
-    startThreadSUB(_dataID, _data);
+    startThreadSUB(this);
 
     return true;
 }
@@ -211,7 +231,7 @@ bool Client::joinData(CollabData* data, unsigned int dataID) {
     _data = data;
 
     data->setOperationBroadcaster(*this);
-    startThreadSUB(_dataID, _data);
+    startThreadSUB(this);
 
     return true;
 }
@@ -242,6 +262,11 @@ bool Client::leaveData() {
 
     return true;
 }
+
+
+// -----------------------------------------------------------------------------
+// Misc
+// -----------------------------------------------------------------------------
 
 bool Client::isUgly() const {
     if(!this->isConnected()) {

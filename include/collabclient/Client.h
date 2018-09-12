@@ -112,6 +112,14 @@ class Client : OperationObserver {
         unsigned int getUserID() const { return _userID; }
 
         /**
+         * Get pointer to the current data you are collaborating on.
+         * Returns null if no data loaded.
+         *
+         * \return Pointer to the data.
+         */
+        CollabData* getData() { return _data; }
+
+        /**
          * Check whether client is currently connected to a CollabServer.
          *
          * \return True if connected, otherwise, return false.
