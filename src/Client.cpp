@@ -16,7 +16,6 @@ namespace collab {
 
 
 // Local variables: prefixed with l_
-static bool             l_isListeningSUB    = false;
 static ZMQSocket*       l_socketREQ         = nullptr;
 static ZMQSocket*       l_socketSUB         = nullptr;
 static MessageFactory&  l_msgFactory        = MessageFactory::getInstance();
@@ -27,53 +26,70 @@ static MessageFactory&  l_msgFactory        = MessageFactory::getInstance();
 // -----------------------------------------------------------------------------
 
 // Listen incoming RoomOperation messages
+// WARNING: Call it only once (No check done)
 static void listenSocketSUB(Client* client) {
     assert(client != nullptr);
-    assert(l_isListeningSUB == true);
 
-    while(l_isListeningSUB) {
-        Message* received = l_socketSUB->receiveMessage();
+    while(true) {
+        Message* received = nullptr;
+        try {
+            received = l_socketSUB->receiveMessage();
+        }
+        catch(std::exception& e) {
+            // Usually zmq::error_t meaning SIGINT received for instance.
+            break;
+        }
+
         if(received->getType() != MessageFactory::MSG_ROOM_OPERATION) {
             continue;
         }
+        else if(!client->isDataLoaded()) {
+            // This thread is running even when no data loaded.
+            // Thanks to ZMQ subscription, no msg should be received if no data
+            // loaded. But, in case of, this will skip it anyway.
+            continue;
+        }
 
-        // TODO Add userID and roomID check etc
+        // These are only aliases (Compiler should kill them! Ooooh!)
         MsgRoomOperation* msg = static_cast<MsgRoomOperation*>(received);
-        int operationID = msg->getOpTypeID();
-        if(msg->getUserID() != client->getUserID()) {
+        const int opID   = msg->getOpTypeID();
+        const int userID = msg->getUserID();
+        const int roomID = msg->getRoomID();
+
+        // Listen only for OP from other users for the current room (Important)
+        if(userID != client->getUserID() && roomID == client->getDataID()) {
             const std::string& buffer = msg->getOperationBuffer();
             assert(client->getData() != nullptr);
-            client->getData()->applyExternOperation(operationID, buffer);
+            client->getData()->applyExternOperation(opID, buffer);
         }
 
         l_msgFactory.freeMessage(received);
     }
 }
 
-// Run the thread that listen to any operation comming from others over network.
-static void startThreadSUB(Client* client) {
-    assert(l_isListeningSUB == false);
+// Start running thread that run the SUB socket listening loop.
+// WARNING: Call it only once (No check done)
+static void runThreadSUB(Client* client) {
     assert(l_socketSUB != nullptr);
     assert(client != nullptr);
-
-    // TODO tmp (Accept everything for now)
-    // TODO: Check if the subscribe actually work (I'm not sure).
-    // Unsubscribe all previous subsciption
-    const char* filter = "";
-    l_socketSUB->setsockopt(ZMQ_UNSUBSCRIBE, "", strlen(""));
-    l_socketSUB->setsockopt(ZMQ_SUBSCRIBE, filter, strlen(filter));
-
-    if(l_isListeningSUB == true) { return; }
-    l_isListeningSUB = true;
 
     std::thread(listenSocketSUB, client).detach();
 }
 
-static void stopThreadSUB() {
-    l_isListeningSUB = false;
-    // TODO: this actuall won't stop the current locked receiveMessage!
-    // Panda! You need to figure out how to interrup this function.
-    // For now, we will probably get a segfault or some horrible things like this.
+static void setSubscriptionSUB(Client* client) {
+    // TODO tmp (Accept everything for now)
+    //      For now, users receive all operation from all rooms!
+    //      note however that only the right operation are applied
+    //      (But this is not using the ZMQ subscription power...)
+    // Unsubscribe all previous subscriptions
+    assert(client != nullptr);
+    const char* filter = "";
+    l_socketSUB->setsockopt(ZMQ_SUBSCRIBE, filter, strlen(filter));
+}
+
+static void resetSubscriptionSUB() {
+    // TODO: Check if the subscribe actually work (I'm not sure).
+    l_socketSUB->setsockopt(ZMQ_UNSUBSCRIBE, "", strlen(""));
 }
 
 
@@ -114,25 +130,31 @@ bool Client::connect(const char* ip, const int port) {
     assert(l_socketREQ != nullptr);
     assert(l_socketSUB != nullptr);
 
-    if(this->isConnected()) { return false; }
+    if(this->isConnected()) {
+        return false;
+    }
     l_socketREQ->connect(ip, port);
     l_socketSUB->connect(ip, COLLAB_SOCKET_SUB_PORT);
 
-    Message* m = l_msgFactory.newMessage(MessageFactory::MSG_CONNECTION_REQUEST);
-    assert(m != nullptr);
-    l_socketREQ->sendMessage(*m);
-    l_msgFactory.freeMessage(m);
+    Message* msg = l_msgFactory.newMessage(MessageFactory::MSG_CONNECTION_REQUEST);
+    assert(msg != nullptr);
+    l_socketREQ->sendMessage(*msg);
+    l_msgFactory.freeMessage(msg);
 
-    m = l_socketREQ->receiveMessage();
-    if(m->getType() != MessageFactory::MSG_CONNECTION_SUCCESS) {
-        l_msgFactory.freeMessage(m);
+    Message* response = l_socketREQ->receiveMessage();
+    assert(response != nullptr);
+    if(response->getType() != MessageFactory::MSG_CONNECTION_SUCCESS) {
+        l_msgFactory.freeMessage(response);
         this->disconnect();
         return false;
     }
 
-    _userID = static_cast<MsgConnectionSuccess*>(m)->getUserID();
+    _userID = static_cast<MsgConnectionSuccess*>(response)->getUserID();
 
-    l_msgFactory.freeMessage(m);
+    resetSubscriptionSUB();
+    runThreadSUB(this);
+
+    l_msgFactory.freeMessage(response);
 
     return true;
 }
@@ -141,31 +163,31 @@ bool Client::disconnect() {
     assert(l_socketREQ != nullptr);
     assert(l_socketSUB != nullptr);
 
-    if(this->isDataLoaded()) {
-        this->leaveData();
-    }
-
     if(!this->isConnected()) {
         return false;
     }
+    else if(this->isDataLoaded()) {
+        this->leaveData();
+    }
 
-    Message* m = l_msgFactory.newMessage(MessageFactory::MSG_DISCONNECT_REQUEST);
-    static_cast<MsgDisconnectRequest*>(m)->setUserID(_userID);
-    l_socketREQ->sendMessage(*m);
-    l_msgFactory.freeMessage(m);
+    Message* req = l_msgFactory.newMessage(MessageFactory::MSG_DISCONNECT_REQUEST);
+    assert(req != nullptr);
+    static_cast<MsgDisconnectRequest*>(req)->setUserID(_userID);
+    l_socketREQ->sendMessage(*req);
+    l_msgFactory.freeMessage(req);
 
-    m = l_socketREQ->receiveMessage();
-    if(m->getType() != MessageFactory::MSG_DISCONNECT_SUCCESS) {
-        l_msgFactory.freeMessage(m);
+    Message* response = l_socketREQ->receiveMessage();
+    if(response->getType() != MessageFactory::MSG_DISCONNECT_SUCCESS) {
+        l_msgFactory.freeMessage(response);
         return false;
     }
 
     _userID = 0;
 
-    l_msgFactory.freeMessage(m);
-
-    l_socketREQ->disconnect();
     l_socketSUB->disconnect();
+    l_socketREQ->disconnect();
+
+    l_msgFactory.freeMessage(response);
 
     return true;
 }
@@ -181,27 +203,29 @@ bool Client::createData(CollabData* data) {
         return false;
     }
 
-    Message* m = l_msgFactory.newMessage(MessageFactory::MSG_CREA_DATA_REQUEST);
-    static_cast<MsgCreaDataRequest*>(m)->setUserID(_userID);
-    l_socketREQ->sendMessage(*m);
-    l_msgFactory.freeMessage(m);
+    Message* req = l_msgFactory.newMessage(MessageFactory::MSG_CREA_DATA_REQUEST);
+    assert(req != nullptr);
+    static_cast<MsgCreaDataRequest*>(req)->setUserID(_userID);
+    l_socketREQ->sendMessage(*req);
+    l_msgFactory.freeMessage(req);
 
-    m = l_socketREQ->receiveMessage();
-    if(m->getType() != MessageFactory::MSG_CREA_DATA_SUCCESS) {
-        l_msgFactory.freeMessage(m);
+    Message* response = l_socketREQ->receiveMessage();
+    if(response->getType() != MessageFactory::MSG_CREA_DATA_SUCCESS) {
+        l_msgFactory.freeMessage(response);
         return false;
     }
 
     _data = data;
-    _dataID = static_cast<MsgCreaDataSuccess*>(m)->getDataID();
-
-    l_msgFactory.freeMessage(m);
+    _dataID = static_cast<MsgCreaDataSuccess*>(response)->getDataID();
 
     assert(_data != nullptr);
     assert(_dataID != 0);
 
+    resetSubscriptionSUB();
+    setSubscriptionSUB(this);
     data->setOperationBroadcaster(*this);
-    startThreadSUB(this);
+
+    l_msgFactory.freeMessage(response);
 
     return true;
 }
@@ -213,25 +237,33 @@ bool Client::joinData(CollabData* data, unsigned int dataID) {
         return false;
     }
 
-    Message* m = l_msgFactory.newMessage(MessageFactory::MSG_JOIN_DATA_REQUEST);
-    static_cast<MsgJoinDataRequest*>(m)->setUserID(_userID);
-    static_cast<MsgJoinDataRequest*>(m)->setDataID(dataID);
-    l_socketREQ->sendMessage(*m);
-    l_msgFactory.freeMessage(m);
+    // It is actually important to set the SUB socket BEFORE sending the
+    // join request. This is because join request will possibly send all the
+    // operation done on the data. This is really fast and user may not
+    // have received the MSG_JOIN_DATA_SUCCESS yet
+    _dataID = dataID;
+    _data = data;
+    resetSubscriptionSUB();
+    setSubscriptionSUB(this);
 
-    m = l_socketREQ->receiveMessage();
-    if(m->getType() != MessageFactory::MSG_JOIN_DATA_SUCCESS) {
-        l_msgFactory.freeMessage(m);
+    Message* req = l_msgFactory.newMessage(MessageFactory::MSG_JOIN_DATA_REQUEST);
+    static_cast<MsgJoinDataRequest*>(req)->setUserID(_userID);
+    static_cast<MsgJoinDataRequest*>(req)->setDataID(dataID);
+    l_socketREQ->sendMessage(*req);
+    l_msgFactory.freeMessage(req);
+
+    Message* response = l_socketREQ->receiveMessage();
+    if(response->getType() != MessageFactory::MSG_JOIN_DATA_SUCCESS) {
+        resetSubscriptionSUB();
+        _dataID = 0;
+        _data = nullptr;
+        l_msgFactory.freeMessage(response);
         return false;
     }
 
-    l_msgFactory.freeMessage(m);
-
-    _dataID = dataID;
-    _data = data;
-
     data->setOperationBroadcaster(*this);
-    startThreadSUB(this);
+
+    l_msgFactory.freeMessage(response);
 
     return true;
 }
@@ -241,24 +273,23 @@ bool Client::leaveData() {
         return false;
     }
 
-    Message* m = l_msgFactory.newMessage(MessageFactory::MSG_LEAVE_DATA_REQUEST);
-    static_cast<MsgLeaveDataRequest*>(m)->setUserID(_userID);
-    l_socketREQ->sendMessage(*m);
-    l_msgFactory.freeMessage(m);
+    Message* req = l_msgFactory.newMessage(MessageFactory::MSG_LEAVE_DATA_REQUEST);
+    static_cast<MsgLeaveDataRequest*>(req)->setUserID(_userID);
+    l_socketREQ->sendMessage(*req);
+    l_msgFactory.freeMessage(req);
 
-    m = l_socketREQ->receiveMessage();
-    if(m->getType() != MessageFactory::MSG_LEAVE_DATA_SUCCESS) {
-        l_msgFactory.freeMessage(m);
+    Message* response = l_socketREQ->receiveMessage();
+    if(response->getType() != MessageFactory::MSG_LEAVE_DATA_SUCCESS) {
+        l_msgFactory.freeMessage(response);
         return false;
     }
 
-    stopThreadSUB();
-
-    _dataID = 0;
+    resetSubscriptionSUB();
     _data->removeOperationBroadcaster();
+    _dataID = 0;
     _data = nullptr;
 
-    l_msgFactory.freeMessage(m);
+    l_msgFactory.freeMessage(response);
 
     return true;
 }
@@ -273,20 +304,20 @@ bool Client::isUgly() const {
         return true;
     }
 
-    Message* m = l_msgFactory.newMessage(MessageFactory::MSG_UGLY);
-    static_cast<MsgUgly*>(m)->setUserID(_userID);
-    l_socketREQ->sendMessage(*m);
-    l_msgFactory.freeMessage(m);
+    Message* req = l_msgFactory.newMessage(MessageFactory::MSG_UGLY);
+    static_cast<MsgUgly*>(req)->setUserID(_userID);
+    l_socketREQ->sendMessage(*req);
+    l_msgFactory.freeMessage(req);
 
-    m = l_socketREQ->receiveMessage();
-    if(m->getType() != MessageFactory::MSG_UGLY) {
-        l_msgFactory.freeMessage(m);
+    Message* response = l_socketREQ->receiveMessage();
+    if(response->getType() != MessageFactory::MSG_UGLY) {
+        l_msgFactory.freeMessage(response);
         return false;
     }
 
-    bool isUgly = static_cast<MsgUgly*>(m)->getResponse();
+    bool isUgly = static_cast<MsgUgly*>(response)->getResponse();
 
-    l_msgFactory.freeMessage(m);
+    l_msgFactory.freeMessage(response);
 
     return isUgly;
 }
@@ -301,22 +332,22 @@ void Client::onOperation(const Operation& op) {
     std::stringstream opBuffer;
     op.serialize(opBuffer);
 
-    Message* m = l_msgFactory.newMessage(MessageFactory::MSG_ROOM_OPERATION);
-    static_cast<MsgRoomOperation*>(m)->setRoomID(_dataID);
-    static_cast<MsgRoomOperation*>(m)->setUserID(_userID);
-    static_cast<MsgRoomOperation*>(m)->setOpTypeID(op.getType());
-    static_cast<MsgRoomOperation*>(m)->setOperationBuffer(opBuffer.str());
+    Message* req = l_msgFactory.newMessage(MessageFactory::MSG_ROOM_OPERATION);
+    static_cast<MsgRoomOperation*>(req)->setRoomID(_dataID);
+    static_cast<MsgRoomOperation*>(req)->setUserID(_userID);
+    static_cast<MsgRoomOperation*>(req)->setOpTypeID(op.getType());
+    static_cast<MsgRoomOperation*>(req)->setOperationBuffer(opBuffer.str());
 
-    l_socketREQ->sendMessage(*m);
-    l_msgFactory.freeMessage(m);
+    l_socketREQ->sendMessage(*req);
+    l_msgFactory.freeMessage(req);
 
-    m = l_socketREQ->receiveMessage();
-    if(m->getType() != MessageFactory::MSG_EMPTY) {
-        l_msgFactory.freeMessage(m);
+    Message* response = l_socketREQ->receiveMessage();
+    if(response->getType() != MessageFactory::MSG_EMPTY) {
+        l_msgFactory.freeMessage(response);
         return;
     }
 
-    l_msgFactory.freeMessage(m);
+    l_msgFactory.freeMessage(response);
 }
 
 

@@ -41,8 +41,9 @@ class Client : OperationObserver {
         bool connect(const char* ip, const int port);
 
         /**
-         * Stop connection with remove server.
+         * Stop connection with remote server.
          * Block until server responds.
+         * Leave data if any data is currently loaded.
          *
          * \return True if successfully disconnected, otherwise, return false
          */
