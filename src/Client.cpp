@@ -53,11 +53,11 @@ static void listenSocketSUB(Client* client) {
         // These are only aliases (Compiler should kill them! Ooooh!)
         MsgRoomOperation* msg = static_cast<MsgRoomOperation*>(received);
         const int opID   = msg->getOpTypeID();
-        const int userID = msg->getUserID();
         const int roomID = msg->getRoomID();
 
-        // Listen only for OP from other users for the current room (Important)
-        if(userID != client->getUserID() && roomID == client->getDataID()) {
+        // Listen only for OP from current room
+        // Note: you may receive your own op (ex: Join -> leave -> rejoin room)
+        if(roomID == client->getDataID()) {
             const std::string& buffer = msg->getOperationBuffer();
             assert(client->getData() != nullptr);
             client->getData()->applyExternOperation(opID, buffer);
