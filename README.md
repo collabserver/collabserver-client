@@ -26,7 +26,7 @@ End-user interface to connect and work with a CollabServer.
 ## Build instructions (CMake)
 Client interface is built as a static library.
 If built the static lib manually, you must also include `collab-data-crdts/include`
-and `collab-common/include` headers.
+and `collab-common/include` headers and, add collab-common/src files to the lib.
 
 ### Requirements
 - C++11
@@ -107,7 +107,7 @@ make runTests
 ## Getting Started
 collab-client is built as a static lib.
 In order to use it in your project, you must also link its dependencies
-`collabcommon`, `zmq` and, `pthread` in your executable.
+`zmq` and, `pthread` in your executable.
 If you are using the custom component of collab-data-crdts, you must also
 link `collabdata`.
 
