@@ -10,60 +10,84 @@
 
 
 ## Overview
-End-user interface to connect with a CollabServer.
+End-user interface to connect and work with a CollabServer.
 
 
-## Requirements
+## Features
+- Server
+    - Connect
+    - Disconnect
+- Data
+    - Create data on server
+    - Join data
+    - Leave data
+
+
+## Build instructions (CMake)
+Client interface is built as a static library.
+If built the static lib manually, you must also include `collab-data-crdts/include`
+and `collab-common/include` headers.
+
+### Requirements
 - C++11
 - `pragma once` support
 - Tested with gcc 4.8.4
 - Tested with clang 5.0.0
 - Tested only on Linux. Not support certified for Mac and Windows
 
+### Dependencies
+All dependencies are automatically downloaded by CMake and placed in a folder
+named `dependencies`.
+You may move this folder in another place later and request CMake not to
+download dependencies anymore (**See CMake options**).
 
-## Dependencies
-> Dependencies marked with *(CMake)* are automatically downloaded by CMake
-> script and placed in *dependencies* folder.
-> Others must be installed manually (Generally system-wide install).
-- [ZeroMQ](http://zeromq.org/) (**Must be installed system-wide**)
-- [collab-common](https://github.com/CollabServer/collab-common.git) (CMake. Git submodule)
-- [collab-data-crdts](https://github.com/CollabServer/collab-data-crdts.git) (CMake. Git submodule)
-- [GoogleTest](https://github.com/google/googletest) (CMake. Only for tests)
+If you are using a custom permanent location for your dependencies, a convenient
+solution is to set the environment variable `COLLAB_DEPENDENCIES_DIR` with this path.
+CMake will use this one as the default location (Except if a custom path is
+given as CMake parameter).
 
+- [GoogleTest](https://github.com/google/googletest)
 
-## Build instructions
-Client interface is built as a static library.
-If built the static lib manually, you must also include `collab-data-crdts/include`
-and `collab-common/include` headers.
+### Manual dependencies (System Wide)
+These dependencies **must be installed system-wide** and are not downloaded by CMake.
+Check the instruction specific to your operating system for further information.
+(Ex: `pacman -S zeromq` on ArchLinux)
 
-### Build types
-- CMake build types (ex: `-DCMAKE_BUILD_TYPE=Debug`):
-    - Debug
-    - Release
-    - RelWithDebInfo
-    - MinSizeRel
+- [ZeroMQ](http://zeromq.org/)
 
-### CMake options
-- collab_tests (ON/OFF): Build unit tests
-- collab_examples (ON/OFF): Build example
+### Git submodules
+These are used internally by collab-server and are compiled along with collab-server.
+You may work on the submodules from this project.
 
-### Clone project with submodules
+- [collab-common](https://github.com/CollabServer/collab-common.git)
+- [collab-data-crdts](https://github.com/CollabServer/collab-data-crdts.git)
+
 ```bash
+# To clone project with submodules
 git clone --recursive https://github.com/CollabServer/collab-client-interface.git
-cd collab-client-interface
 
-# To pull changes from gitmodules
-git pull --recurse-submodules=on-demand
+# To pull also submodules
+git pull --recurse-submodules=on
+
 # To update submodules
 git submodule update
 ```
+
+### CMake options
+| Name | Description |
+| --- | --- |
+| COLLAB_DEPENDENCIES_DIR | (STRING) Path to a directory where to find all dependencies (By default, uses current cmake build) |
+| COLLAB_DEPENDENCIES_DOWNLOAD | (ON/OFF) Set ON to also download dependencies at cmake time. This is useful the first time you setup the project. Dependencies are placed in COLLAB_DEPENDENCIES_DIR. (By default: OFF).|
+| COLLAB_TESTS | (ON/OFF) Set ON to build unit tests |
+| COLLAB_EXAMPLES | (ON/OFF) Set ON to build examples |
+| CMAKE_BUILD_TYPE | Debug, Release, RelWithDebInfo, MinSizeRel |
 
 ### Build static lib with CMake
 ```bash
 mkdir build
 cd build
-cmake ..
-make -j4
+cmake -DCOLLAB_DEPENDENCIES_DOWNLOAD=ON ..
+make -j2
 ```
 
 ### Build tests with CMake
@@ -71,8 +95,8 @@ make -j4
 # Build manually
 mkdir build
 cd build
-cmake ..
-make -j4
+cmake -DCOLLAB_DEPENDENCIES_DOWNLOAD=ON ..
+make -j2
 make runTests
 
 # Build from shell script
