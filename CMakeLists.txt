@@ -7,40 +7,39 @@ endif()
 
 
 # ------------------------------------------------------------------------------
-# General Dependencies / Various
+# Dependencies / Misc
 # ------------------------------------------------------------------------------
-set(collab_dependency_dir "${CMAKE_SOURCE_DIR}/dependencies/")
-set(collab_gitmodule_dir "${CMAKE_SOURCE_DIR}/gitmodules/")
+set(COLLAB_GITMODULES_DIR "${CMAKE_SOURCE_DIR}/gitmodules/")
 
 include("CMake/AddCompilerFlags.cmake")
+include("CMake/AddDependencies.cmake")
+
+# Internal submodules dependencies
+include("CMake/ExternalProjects/CollabCommon.cmake")
+include_directories("${COLLAB_GITMODULES_DIR}/collab-data-crdts/include")
+include_directories("${COLLAB_GITMODULES_DIR}/collab-common/include")
 
 
 # ------------------------------------------------------------------------------
 # Client Interface (Static LIB)
 # ------------------------------------------------------------------------------
-include_directories("${CMAKE_SOURCE_DIR}/include/")
-include_directories("${CMAKE_SOURCE_DIR}/gitmodules/collab-data-crdts/include/")
-include_directories("${CMAKE_SOURCE_DIR}/gitmodules/collab-common/include/")
+include_directories("${CMAKE_SOURCE_DIR}/include")
 
 file(GLOB_RECURSE srcFiles "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
 add_library(collabclient STATIC ${srcFiles})
-add_custom_target(buildClient collabclient)
 
 
 # ------------------------------------------------------------------------------
 # Examples
 # ------------------------------------------------------------------------------
-option(collab_examples "Build examples" OFF)
+option(COLLAB_EXAMPLES "Build examples" OFF)
 
-if(collab_examples)
-    message(STATUS "Build examples")
+if(COLLAB_EXAMPLES)
+    message(STATUS "Building examples")
 
-    # Dependencies
-    include("CMake/ExternalProjects/Collabcommon.cmake")
     add_dependencies(collabclient collab-common)
 
-    # Examples executables
     add_executable(exampleClient examples/exampleClient.cpp)
     add_custom_target(runExampleClient exampleClient)
     target_link_libraries(exampleClient collabclient collabcommon zmq pthread)
@@ -50,19 +49,16 @@ endif()
 # ------------------------------------------------------------------------------
 # Tests
 # ------------------------------------------------------------------------------
-option(collab_tests "Build tests" OFF)
+option(COLLAB_TESTS "Build tests" OFF)
 
-if(collab_tests)
-    message(STATUS "Build tests")
+if(COLLAB_TESTS)
+    message(STATUS "Building tests")
     enable_testing()
 
-    # Dependencies
-    include("CMake/Dependencies/AddGoogleTest.cmake")
-    include("CMake/ExternalProjects/Collabcommon.cmake")
     add_dependencies(collabclient collab-common)
 
-    # Tests executables
     file(GLOB_RECURSE srcFilesTests "${CMAKE_SOURCE_DIR}/test/*.cpp")
+
     add_executable(tests ${srcFilesTests})
     add_test(NAME googletests COMMAND tests)
     add_custom_target(runTests tests)
