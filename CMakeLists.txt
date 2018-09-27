@@ -36,6 +36,7 @@ file(GLOB_RECURSE srcFiles "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
 add_library(collabclient_ONLY STATIC ${srcFiles})
 add_dependencies(collabclient_ONLY collab-common)
+
 set(COLLABCLIENT_LIB ${CMAKE_BINARY_DIR}/libcollabclient.a)
 set(COLLABCOMMON_DIR "${CMAKE_BINARY_DIR}/collab-common-build")
 
