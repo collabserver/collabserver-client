@@ -35,4 +35,9 @@ endif()
 
 include("CMake/Dependencies/AddGoogleTest.cmake")
 
+# Internal submodules dependencies
+include("CMake/ExternalProjects/CollabCommon.cmake")
+include_directories("${COLLAB_GITMODULES_DIR}/collab-data-crdts/include")
+include_directories("${COLLAB_GITMODULES_DIR}/collab-common/include")
+
 

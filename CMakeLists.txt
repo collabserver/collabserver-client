@@ -14,11 +14,6 @@ set(COLLAB_GITMODULES_DIR "${CMAKE_SOURCE_DIR}/gitmodules/")
 include("CMake/AddCompilerFlags.cmake")
 include("CMake/AddDependencies.cmake")
 
-# Internal submodules dependencies
-include("CMake/ExternalProjects/CollabCommon.cmake")
-include_directories("${COLLAB_GITMODULES_DIR}/collab-data-crdts/include")
-include_directories("${COLLAB_GITMODULES_DIR}/collab-common/include")
-
 
 # ------------------------------------------------------------------------------
 # Client Interface (Static LIB)

@@ -6,6 +6,7 @@
 
 # Alias variables
 set(COLLAB_GTEST_DIR        "${COLLAB_DEPENDENCIES_DIR}/googletest")
+
 set(COLLAB_GTEST_SOURCES    "${COLLAB_GTEST_DIR}/sources")
 set(COLLAB_GTEST_HEADERS    "${COLLAB_GTEST_DIR}/include")
 set(COLLAB_GTEST_DOWNLOAD   "${CMAKE_BINARY_DIR}/googletest-download")
@@ -16,6 +17,7 @@ if(COLLAB_DEPENDENCIES_DOWNLOAD)
     # Create dep folder content
     file(MAKE_DIRECTORY "${COLLAB_GTEST_SOURCES}")
     file(MAKE_DIRECTORY "${COLLAB_GTEST_HEADERS}")
+
 
     # Create Download CMakeLists
     configure_file(
