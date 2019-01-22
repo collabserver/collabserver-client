@@ -9,16 +9,16 @@
 
 
 # Overview
-End-user interface to connect and work with a CollabServer.
+End-user interface to connect and work with a running instance of collab-server.
 
 
 # Getting Started
-1. Be sure you have all requirements and system-wide dependencies
-1. Build collabclient static lib (See build instructions)
-1. Link your application with `libcollabclient.a`
-1. Include `collabdata` headers
-1. Include `collabclient` headers
-1. Link also with dependencies `zmq` and `pthread`
+1. Be sure you have all the requirements and system-wide dependencies
+1. Build this project (see build instructions)
+1. Link your application with `libcollabclient.a` just built
+1. Include the `collabdata` headers
+1. Include the `collabclient` headers
+1. Link with the dependencies `zmq` and `pthread`
 
 
 # Features
@@ -34,8 +34,7 @@ End-user interface to connect and work with a CollabServer.
 # Build on Linux (CMake)
 **Build static lib**
 ```bash
-# Warning: Install system-wide dependencies
-# Be sure you have all requirements
+# Warning: be sure you have all the system-wide dependencies and requirements.
 
 mkdir build
 cd build
@@ -45,8 +44,7 @@ make
 
 **Build tests**
 ```bash
-# Warning: Install system-wide dependencies
-# Be sure you have all requirements
+# Warning: be sure you have all the system-wide dependencies and requirements.
 
 mkdir build
 cd build
@@ -54,7 +52,7 @@ cmake -DCOLLAB_DEPENDENCIES_DOWNLOAD=ON ..
 make
 make runTests
 
-# Or use build script
+# Or use the build script
 ./build.sh
 ```
 
@@ -62,7 +60,7 @@ make runTests
 
 | CMake option name | Description |
 | --- | --- |
-| COLLAB_DEPENDENCIES_DIR | (STRING) Path to a directory where to find all dependencies (By default, uses current cmake build) |
+| COLLAB_DEPENDENCIES_DIR | (STRING) Path to a directory where all dependencies are located (By default, uses current cmake build). If this option is unset but the environment variable `COLLAB_DEPENDENCIES_DIR` exists, this one is used instead of the default value. |
 | COLLAB_DEPENDENCIES_DOWNLOAD | (ON/OFF) Set ON to also download dependencies at cmake time. This is useful the first time you setup the project. Dependencies are placed in COLLAB_DEPENDENCIES_DIR. (By default: OFF).|
 | COLLAB_TESTS | (ON/OFF) Set ON to build unit tests |
 | COLLAB_EXAMPLES | (ON/OFF) Set ON to build examples |
