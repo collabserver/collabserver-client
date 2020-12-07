@@ -10,7 +10,7 @@ Cleanup:
     ☐ Rename `namespace collab` to `namespace collabserver`
     ☐ Update CMake to place dependencies in the folder `extern`
     ☐ Update CMake with cleaned up version
-    ☐ Update Travis CI
+    ✔ Update Travis CI @done(20-12-08 00:36)
 Readme:
     ☐ Update README with a custom logo
     ☐ Update README with valid markdown
