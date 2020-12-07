@@ -4,7 +4,6 @@
 Cleanup:
     ☐ Update all pointers with safer type (e.g., `std::unique_ptr`)
     ☐ Rename `include/collabclient` to `include/collabserver/client`
-    ☐ Fix gitmodules with the renamed version of the projects
     ☐ Rename all `collab-client` to `collabserver-client`
     ☐ Rename `test` to `tests`
     ☐ Rename `namespace collab` to `namespace collabserver`
@@ -15,6 +14,7 @@ Readme:
     ☐ Update README with valid markdown
 
 Archive:
+  ✔ Fix gitmodules with the renamed version of the projects @done(20-12-08 00:47) @project(Cleanup)
   ✔ Update Travis CI @done(20-12-08 00:36) @project(Cleanup)
   ✔ Add clang-format @done(20-12-08 00:36) @project(Cleanup)
   ✔ Apply clang-format on the whole project @done(20-12-08 00:36) @project(Cleanup)
