@@ -1,16 +1,12 @@
-#include "collabclient/Client.h"
-
 #include <gtest/gtest.h>
 
-namespace collab {
+#include "collabclient/Client.h"
 
+namespace collab {
 
 TEST(Client, constructorDestructor) {
     Client client;
     // TODO
 }
 
-
-} // End namespace
-
-
+}  // namespace collab

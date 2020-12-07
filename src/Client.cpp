@@ -1,25 +1,23 @@
 #include "collabclient/Client.h"
 
 #include <cassert>
-#include <thread>
 #include <sstream>
-#include <string> // For operation buffer
-#include <zmq.hpp> // For ZMQ socket options
+#include <string>  // For operation buffer
+#include <thread>
+#include <zmq.hpp>  // For ZMQ socket options
 
-#include "collabcommon/messaging/MessageFactory.h"
 #include "collabcommon/messaging/Message.h"
+#include "collabcommon/messaging/MessageFactory.h"
 #include "collabcommon/messaging/MessageList.h"
 #include "collabcommon/network/ZMQSocket.h"
 #include "collabcommon/utils/constants.h"
 
 namespace collab {
 
-
 // Local variables: prefixed with l_
-static ZMQSocket*       l_socketREQ         = nullptr;
-static ZMQSocket*       l_socketSUB         = nullptr;
-static MessageFactory&  l_msgFactory        = MessageFactory::getInstance();
-
+static ZMQSocket* l_socketREQ = nullptr;
+static ZMQSocket* l_socketSUB = nullptr;
+static MessageFactory& l_msgFactory = MessageFactory::getInstance();
 
 // -----------------------------------------------------------------------------
 // SUB Socket methods
@@ -30,20 +28,18 @@ static MessageFactory&  l_msgFactory        = MessageFactory::getInstance();
 static void listenSocketSUB(Client* client) {
     assert(client != nullptr);
 
-    while(true) {
+    while (true) {
         Message* received = nullptr;
         try {
             received = l_socketSUB->receiveMessage();
-        }
-        catch(std::exception& e) {
+        } catch (std::exception& e) {
             // Usually zmq::error_t meaning SIGINT received for instance.
             break;
         }
 
-        if(received->getType() != MessageFactory::MSG_ROOM_OPERATION) {
+        if (received->getType() != MessageFactory::MSG_ROOM_OPERATION) {
             continue;
-        }
-        else if(!client->isDataLoaded()) {
+        } else if (!client->isDataLoaded()) {
             // This thread is running even when no data loaded.
             // Thanks to ZMQ subscription, no msg should be received if no data
             // loaded. But, in case of, this will skip it anyway.
@@ -52,12 +48,12 @@ static void listenSocketSUB(Client* client) {
 
         // These are only aliases (Compiler should kill them! Ooooh!)
         MsgRoomOperation* msg = static_cast<MsgRoomOperation*>(received);
-        const int opID   = msg->getOpTypeID();
+        const int opID = msg->getOpTypeID();
         const int roomID = msg->getRoomID();
 
         // Listen only for OP from current room
         // Note: you may receive your own op (ex: Join -> leave -> rejoin room)
-        if(roomID == client->getDataID()) {
+        if (roomID == client->getDataID()) {
             const std::string& buffer = msg->getOperationBuffer();
             assert(client->getData() != nullptr);
             client->getData()->applyExternOperation(opID, buffer);
@@ -92,14 +88,13 @@ static void resetSubscriptionSUB() {
     l_socketSUB->setsockopt(ZMQ_UNSUBSCRIBE, "", strlen(""));
 }
 
-
 // -----------------------------------------------------------------------------
 // Client init
 // -----------------------------------------------------------------------------
 
 Client::Client() {
-    ZMQSocketConfig configREQ = { ZMQ_REQ, &(MessageFactory::getInstance()) };
-    ZMQSocketConfig configSUB = { ZMQ_SUB, &(MessageFactory::getInstance()) };
+    ZMQSocketConfig configREQ = {ZMQ_REQ, &(MessageFactory::getInstance())};
+    ZMQSocketConfig configSUB = {ZMQ_SUB, &(MessageFactory::getInstance())};
 
     l_socketREQ = new ZMQSocket(configREQ);
     l_socketSUB = new ZMQSocket(configSUB);
@@ -121,7 +116,6 @@ Client::~Client() {
     l_socketSUB = nullptr;
 }
 
-
 // -----------------------------------------------------------------------------
 // Connection / Disconnect
 // -----------------------------------------------------------------------------
@@ -130,7 +124,7 @@ bool Client::connect(const char* ip, const int port) {
     assert(l_socketREQ != nullptr);
     assert(l_socketSUB != nullptr);
 
-    if(this->isConnected()) {
+    if (this->isConnected()) {
         return false;
     }
     l_socketREQ->connect(ip, port);
@@ -143,7 +137,7 @@ bool Client::connect(const char* ip, const int port) {
 
     Message* response = l_socketREQ->receiveMessage();
     assert(response != nullptr);
-    if(response->getType() != MessageFactory::MSG_CONNECTION_SUCCESS) {
+    if (response->getType() != MessageFactory::MSG_CONNECTION_SUCCESS) {
         l_msgFactory.freeMessage(response);
         this->disconnect();
         return false;
@@ -163,10 +157,9 @@ bool Client::disconnect() {
     assert(l_socketREQ != nullptr);
     assert(l_socketSUB != nullptr);
 
-    if(!this->isConnected()) {
+    if (!this->isConnected()) {
         return false;
-    }
-    else if(this->isDataLoaded()) {
+    } else if (this->isDataLoaded()) {
         this->leaveData();
     }
 
@@ -177,7 +170,7 @@ bool Client::disconnect() {
     l_msgFactory.freeMessage(req);
 
     Message* response = l_socketREQ->receiveMessage();
-    if(response->getType() != MessageFactory::MSG_DISCONNECT_SUCCESS) {
+    if (response->getType() != MessageFactory::MSG_DISCONNECT_SUCCESS) {
         l_msgFactory.freeMessage(response);
         return false;
     }
@@ -192,14 +185,13 @@ bool Client::disconnect() {
     return true;
 }
 
-
 // -----------------------------------------------------------------------------
 // Data
 // -----------------------------------------------------------------------------
 
 bool Client::createData(CollabData* data) {
     assert(data != nullptr);
-    if(!this->isConnected() || this->isDataLoaded()) {
+    if (!this->isConnected() || this->isDataLoaded()) {
         return false;
     }
 
@@ -210,7 +202,7 @@ bool Client::createData(CollabData* data) {
     l_msgFactory.freeMessage(req);
 
     Message* response = l_socketREQ->receiveMessage();
-    if(response->getType() != MessageFactory::MSG_CREA_DATA_SUCCESS) {
+    if (response->getType() != MessageFactory::MSG_CREA_DATA_SUCCESS) {
         l_msgFactory.freeMessage(response);
         return false;
     }
@@ -233,7 +225,7 @@ bool Client::createData(CollabData* data) {
 bool Client::joinData(CollabData* data, unsigned int dataID) {
     assert(data != nullptr);
     assert(dataID > 0);
-    if(!this->isConnected() || this->isDataLoaded()) {
+    if (!this->isConnected() || this->isDataLoaded()) {
         return false;
     }
 
@@ -253,7 +245,7 @@ bool Client::joinData(CollabData* data, unsigned int dataID) {
     l_msgFactory.freeMessage(req);
 
     Message* response = l_socketREQ->receiveMessage();
-    if(response->getType() != MessageFactory::MSG_JOIN_DATA_SUCCESS) {
+    if (response->getType() != MessageFactory::MSG_JOIN_DATA_SUCCESS) {
         resetSubscriptionSUB();
         _dataID = 0;
         _data = nullptr;
@@ -269,7 +261,7 @@ bool Client::joinData(CollabData* data, unsigned int dataID) {
 }
 
 bool Client::leaveData() {
-    if(!this->isConnected() || !this->isDataLoaded()) {
+    if (!this->isConnected() || !this->isDataLoaded()) {
         return false;
     }
 
@@ -279,7 +271,7 @@ bool Client::leaveData() {
     l_msgFactory.freeMessage(req);
 
     Message* response = l_socketREQ->receiveMessage();
-    if(response->getType() != MessageFactory::MSG_LEAVE_DATA_SUCCESS) {
+    if (response->getType() != MessageFactory::MSG_LEAVE_DATA_SUCCESS) {
         l_msgFactory.freeMessage(response);
         return false;
     }
@@ -294,13 +286,12 @@ bool Client::leaveData() {
     return true;
 }
 
-
 // -----------------------------------------------------------------------------
 // Misc
 // -----------------------------------------------------------------------------
 
 bool Client::isUgly() const {
-    if(!this->isConnected()) {
+    if (!this->isConnected()) {
         return true;
     }
 
@@ -310,7 +301,7 @@ bool Client::isUgly() const {
     l_msgFactory.freeMessage(req);
 
     Message* response = l_socketREQ->receiveMessage();
-    if(response->getType() != MessageFactory::MSG_UGLY) {
+    if (response->getType() != MessageFactory::MSG_UGLY) {
         l_msgFactory.freeMessage(response);
         return false;
     }
@@ -324,8 +315,8 @@ bool Client::isUgly() const {
 
 // DevNote: remind: this is for op done by the local user.
 void Client::onOperation(const Operation& op) {
-    if(!this->isConnected() || !this->isDataLoaded()) {
-        assert(false); // Should not append (Internal error)
+    if (!this->isConnected() || !this->isDataLoaded()) {
+        assert(false);  // Should not append (Internal error)
         return;
     }
 
@@ -342,7 +333,7 @@ void Client::onOperation(const Operation& op) {
     l_msgFactory.freeMessage(req);
 
     Message* response = l_socketREQ->receiveMessage();
-    if(response->getType() != MessageFactory::MSG_EMPTY) {
+    if (response->getType() != MessageFactory::MSG_EMPTY) {
         l_msgFactory.freeMessage(response);
         return;
     }
@@ -350,7 +341,4 @@ void Client::onOperation(const Operation& op) {
     l_msgFactory.freeMessage(response);
 }
 
-
-} // End namespace
-
-
+}  // namespace collab
