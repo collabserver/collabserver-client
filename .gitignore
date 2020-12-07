@@ -1,7 +1,5 @@
 # Perso add
 build/
-build-release/
-build-debug/
 doc/
 .ycm_extra_conf.py
 
