@@ -1,10 +1,10 @@
 #pragma once
 
-#include "collabdata/custom/CollabData.h"
-#include "collabdata/custom/Operation.h"
-#include "collabdata/custom/OperationObserver.h"
+#include "collabserver/datatypes/collabdata/CollabData.h"
+#include "collabserver/datatypes/collabdata/CollabDataOperation.h"
+#include "collabserver/datatypes/collabdata/CollabDataOperationObserver.h"
 
-namespace collab {
+namespace collabserver {
 
 /*
  * \brief
@@ -13,7 +13,7 @@ namespace collab {
  * Module to connect a remote CollabServer and work on a CollabData.
  * Only one CollabData can be active at the same time.
  */
-class Client : OperationObserver {
+class Client : CollabDataOperationObserver {
    private:
     CollabData* _data = nullptr;
     unsigned int _dataID = 0;

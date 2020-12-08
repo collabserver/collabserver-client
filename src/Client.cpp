@@ -6,13 +6,12 @@
 #include <thread>
 #include <zmq.hpp>  // For ZMQ socket options
 
-#include "collabcommon/messaging/Message.h"
-#include "collabcommon/messaging/MessageFactory.h"
-#include "collabcommon/messaging/MessageList.h"
-#include "collabcommon/network/ZMQSocket.h"
-#include "collabcommon/utils/constants.h"
+#include "collabserver/network/messaging/Message.h"
+#include "collabserver/network/messaging/MessageFactory.h"
+#include "collabserver/network/messaging/MessageList.h"
+#include "collabserver/network/socket/ZMQSocket.h"
 
-namespace collab {
+namespace collabserver {
 
 // Local variables: prefixed with l_
 static ZMQSocket* l_socketREQ = nullptr;

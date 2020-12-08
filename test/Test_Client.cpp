@@ -2,7 +2,7 @@
 
 #include "collabclient/Client.h"
 
-namespace collab {
+namespace collabserver {
 
 TEST(Client, constructorDestructor) {
     Client client;
