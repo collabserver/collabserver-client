@@ -1,4 +1,3 @@
 #pragma once
 
-#define COLLAB_SOCKET_SUB_PORT      4243
-
+#define COLLABSERVER_CLIENT_SOCKET_SUB_PORT 4243

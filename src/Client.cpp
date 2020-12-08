@@ -128,7 +128,7 @@ bool Client::connect(const char* ip, const int port) {
         return false;
     }
     l_socketREQ->connect(ip, port);
-    l_socketSUB->connect(ip, COLLAB_SOCKET_SUB_PORT);
+    l_socketSUB->connect(ip, COLLABSERVER_CLIENT_SOCKET_SUB_PORT);
 
     Message* msg = l_msgFactory.newMessage(MessageFactory::MSG_CONNECTION_REQUEST);
     assert(msg != nullptr);

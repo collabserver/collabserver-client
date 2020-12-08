@@ -8,8 +8,8 @@ mkdir build || true
 cd build
 
 cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-      -DCOLLAB_TESTS=ON \
-      -DCOLLAB_EXAMPLES=ON \
+      -DCOLLABSERVER_CLIENT_TESTS=ON \
+      -DCOLLABSERVER_CLIENT_EXAMPLES=ON \
       ..
 make
 make runTests

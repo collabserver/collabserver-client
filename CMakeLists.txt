@@ -37,8 +37,8 @@ target_link_libraries(${PROJECT_NAME}-lib collabserver-network-lib)
 
 
 # Examples
-option(COLLAB_EXAMPLES "Build examples" OFF)
-if(COLLAB_EXAMPLES)
+option(COLLABSERVER_CLIENT_EXAMPLES "Build examples" OFF)
+if(COLLABSERVER_CLIENT_EXAMPLES)
     message(STATUS "Building examples for ${PROJECT_NAME}")
 
     add_executable(${PROJECT_NAME}-example examples/exampleClient.cpp)
@@ -48,8 +48,8 @@ endif()
 
 
 # Tests
-option(COLLAB_TESTS "Build Tests" OFF)
-if(COLLAB_TESTS)
+option(COLLABSERVER_CLIENT_TESTS "Build Tests" OFF)
+if(COLLABSERVER_CLIENT_TESTS)
     message(STATUS "Build tests for ${PROJECT_NAME}")
     enable_testing()
 
