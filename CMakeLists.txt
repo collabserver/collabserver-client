@@ -55,7 +55,7 @@ if(COLLAB_TESTS)
     enable_testing()
 
     include_directories("${PROJECT_SOURCE_DIR}/include/")
-    file(GLOB_RECURSE srcFilesTests "${PROJECT_SOURCE_DIR}/test/*.cpp")
+    file(GLOB_RECURSE srcFilesTests "${PROJECT_SOURCE_DIR}/tests/*.cpp")
     add_executable(${PROJECT_NAME}-tests ${srcFilesTests} ${srcFilesRoom})
 
     # Googletest dependency
