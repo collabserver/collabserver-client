@@ -44,7 +44,6 @@ if(COLLAB_EXAMPLES)
     add_executable(${PROJECT_NAME}-example examples/exampleClient.cpp)
     add_custom_target(runExamples ${PROJECT_NAME}-example)
     target_link_libraries(${PROJECT_NAME}-example collabserver-client-lib pthread)
-    #target_link_libraries(${PROJECT_NAME}-example collabclient pthread)
 endif()
 
 

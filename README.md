@@ -7,106 +7,83 @@
 | :-----: | :----: |
 | [![build-status-master](https://travis-ci.org/CollabServer/collabserver-client.svg?branch=master)](https://travis-ci.org/CollabServer/collabserver-client) | [![build-status-master](https://travis-ci.org/CollabServer/collabserver-client.svg?branch=dev)](https://travis-ci.org/CollabServer/collabserver-client) |
 
+## Overview
 
-# Overview
+---
+
 End-user interface to connect and work with a running instance of collab-server.
 
+## Getting Started
 
-# Getting Started
-1. Be sure you have all the requirements and system-wide dependencies
+---
+
+1. Make sure you have all the requirements
 1. Build this project (see build instructions)
-1. Link your application with `libcollabclient.a` just built
 1. Include the `collabdata` headers
 1. Include the `collabclient` headers
-1. Link with the dependencies `zmq` and `pthread`
+1. Link your application with `libcollabclient.a` (built in the previous step)
 
+## Features
 
-# Features
+---
+
 - Server
-    - Connect
-    - Disconnect
+  - Connect to a CollabServer
+  - Disconnect from a CollabServer
 - Data
-    - Create data on server
-    - Join data
-    - Leave data
+  - Start a collaborative room for a data
+  - Join a collaborative room for an existing data
+  - Leave the current room
 
+## Build (CMake)
 
-# Build on Linux (CMake)
-**Build static lib**
+---
+
+- Requirements
+  - [CMake](https://cmake.org/)
+  - C++11
+  - `pragma once` support
+  - Tested with gcc 4.8.4
+  - Tested with clang 5.0.0
+  - Tested only on Linux. No support certified for Mac and Windows
+- Dependencies (already in the repo and built by CMake)
+  - [GoogleTest](https://github.com/google/googletest)
+  - [collabserver-network](https://github.com/CollabServer/collabserver-network)
+  - [collabserver-datatypes](https://github.com/CollabServer/collabserver-datatypes)
+
 ```bash
-# Warning: be sure you have all the system-wide dependencies and requirements.
+# Build the tests and examples
 
 mkdir build
 cd build
-cmake -DCOLLAB_DEPENDENCIES_DOWNLOAD=ON ..
-make
-```
-
-**Build tests**
-```bash
-# Warning: be sure you have all the system-wide dependencies and requirements.
-
-mkdir build
-cd build
-cmake -DCOLLAB_DEPENDENCIES_DOWNLOAD=ON ..
+cmake -DCOLLABSERVER_CLIENT_TESTS=ON -DCOLLABSERVER_CLIENT_EXAMPLES=ON ..
 make
 make runTests
+make runExamples
 
 # Or use the build script
 ./build.sh
 ```
 
-**CMake options**
-
-| CMake option name | Description |
+| CMake option | Description |
 | --- | --- |
-| COLLAB_DEPENDENCIES_DIR | (STRING) Path to a directory where all dependencies are located (By default, uses current cmake build). If this option is unset but the environment variable `COLLAB_DEPENDENCIES_DIR` exists, this one is used instead of the default value. |
-| COLLAB_DEPENDENCIES_DOWNLOAD | (ON/OFF) Set ON to also download dependencies at cmake time. This is useful the first time you setup the project. Dependencies are placed in COLLAB_DEPENDENCIES_DIR. (By default: OFF).|
-| COLLAB_TESTS | (ON/OFF) Set ON to build unit tests |
-| COLLAB_EXAMPLES | (ON/OFF) Set ON to build examples |
+| COLLABSERVER_CLIENT_TESTS | (ON / OFF) Set ON to build unit tests |
+| COLLABSERVER_CLIENT_EXAMPLES | (ON / OFF) Set ON to build examples |
 | CMAKE_BUILD_TYPE | Debug, Release, RelWithDebInfo, MinSizeRel |
 
+## Generate Documentation
 
-# Requirements
-- C++11
-- `pragma once` support
-- Tested with gcc 4.8.4
-- Tested with clang 5.0.0
-- Tested only on Linux. **Not support certified for Mac and Windows**
-- CMake (2.8.2 or higher)
+---
 
-
-# Dependencies
-- System-Wide (**Must be installed manually**)
-    - [ZeroMQ](http://zeromq.org/) (Release 3.1.1)
-        - ArchLinux: `pacman -S zeromq`
-        - Ubuntu: `apt-get install libzmq3 libzmq3-dev`
-        - There is also a [Windows binary here](http://zeromq.org/distro:microsoft-windows) (Not tested yet)
-    - pthread
-- Automatically downloaded and built by CMake
-    - [GoogleTest](https://github.com/google/googletest) (Release 1.8.1)
-    - [collab-common](https://github.com/CollabServer/collab-common.git)
-    - [collab-data-crdts](https://github.com/CollabServer/collab-data-crdts.git)
-
-**Option: save dependencies for offline use**
-> Dependencies downloaded by CMake are placed in the current CMake build folder
-> (in `dependencies` folder).
-> This is useful the firs time.
-> To speedup the cmake process, you may keep these downloaded and built dependencies
-> in a safe place and change the CMake dependencies path (See CMake options).
-
-**Option: use environment variable for dependencies path**
-> If `COLLAB_DEPENDENCIES_DIR` environment variable is set, CMake will use
-> it as the current dependencies path.
-
-
-# Generate Documentation
 1. Install [Doxygen](https://www.stack.nl/~dimitri/doxygen/)
-1. `doxygen Doxyfile`
+1. Run `doxygen Doxyfile`
 1. Files are placed in `doc` folder
 
+## Contribution
 
-# Author
-Constantin Masson ([constantinmasson.com](http://constantinmasson.com/))
+---
 
-
+Feel free to ask me any question, share your ideas or open an issue.
+I started this project during my master thesis at University of Montreal.
+Format uses clang-format with the Google Coding style <https://google.github.io/styleguide/cppguide.html> (see `.clang-format` for further information).
+Make sure you autoformat on save (see <https://clang.llvm.org/docs/ClangFormat.html>)

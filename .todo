@@ -4,14 +4,14 @@
 Cleanup:
     ☐ Update all pointers with safer type (e.g., `std::unique_ptr`)
     ☐ Rename `include/collabclient` to `include/collabserver/client`
-    ☐ Rename `test` to `tests`
 Upgrade:
     ☐ Create actual tests (empty for now)
 Readme:
     ☐ Update README with a custom logo
-    ☐ Update README with valid markdown
+    ✔ Update README with valid markdown @done(20-12-08 02:13)
 
 Archive:
+  ✔ Rename `test` to `tests` @done(20-12-08 02:01) @project(Cleanup)
   ✔ Rename all `collab-client` to `collabserver-client` @done(20-12-08 01:59) @project(Cleanup)
   ✔ Rename `namespace collab` to `namespace collabserver` @done(20-12-08 01:44) @project(Cleanup)
   ✔ Update CMake to place dependencies in the folder `extern` @done(20-12-08 01:44) @project(Cleanup)
