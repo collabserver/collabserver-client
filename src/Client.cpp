@@ -1,4 +1,4 @@
-#include "collabclient/Client.h"
+#include "collabserver/client/Client.h"
 
 #include <cassert>
 #include <sstream>

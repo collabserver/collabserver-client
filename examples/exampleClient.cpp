@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "collabclient/Client.h"
+#include "collabserver/client/Client.h"
 
 #define LOG std::cout << "[LOG]:[" << __TIME__ << "]: "
 

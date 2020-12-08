@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "collabclient/Client.h"
+#include "collabserver/client/Client.h"
 
 namespace collabserver {
 
@@ -9,4 +9,4 @@ TEST(Client, constructorDestructor) {
     // TODO
 }
 
-}  // namespace collab
+}  // namespace collabserver
