@@ -9,7 +9,7 @@
 #define SERVER_PORT 4242
 
 int main(int argc, char** argv) {
-    collab::Client client;
+    collabserver::Client client;
     LOG << "Start example\n";
     LOG << "Connecting to server (" << SERVER_IP << ":" << SERVER_PORT << ")\n";
     bool success = client.connect(SERVER_IP, SERVER_PORT);

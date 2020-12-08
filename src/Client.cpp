@@ -2,14 +2,15 @@
 
 #include <cassert>
 #include <sstream>
-#include <string>  // For operation buffer
+#include <string>
 #include <thread>
-#include <zmq.hpp>  // For ZMQ socket options
+#include <zmq.hpp>
 
 #include "collabserver/network/messaging/Message.h"
 #include "collabserver/network/messaging/MessageFactory.h"
 #include "collabserver/network/messaging/MessageList.h"
 #include "collabserver/network/socket/ZMQSocket.h"
+#include "constants.h"
 
 namespace collabserver {
 
@@ -313,7 +314,7 @@ bool Client::isUgly() const {
 }
 
 // DevNote: remind: this is for op done by the local user.
-void Client::onOperation(const Operation& op) {
+void Client::onOperation(const CollabDataOperation& op) {
     if (!this->isConnected() || !this->isDataLoaded()) {
         assert(false);  // Should not append (Internal error)
         return;
@@ -340,4 +341,4 @@ void Client::onOperation(const Operation& op) {
     l_msgFactory.freeMessage(response);
 }
 
-}  // namespace collab
+}  // namespace collabserver

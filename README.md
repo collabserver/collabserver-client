@@ -1,11 +1,11 @@
 # CollabServer - Client Interface
 
-[![license](https://img.shields.io/badge/license-LGPLv3.0-blue.svg)](https://github.com/CollabServer/collab-client-interface/blob/master/LICENSE.txt)
-[![build-status-master](https://travis-ci.org/CollabServer/collab-client-interface.svg?branch=master)](https://travis-ci.org/CollabServer/collab-client-interface)
+[![license](https://img.shields.io/badge/license-LGPLv3.0-blue.svg)](https://github.com/CollabServer/collabserver-client/blob/master/LICENSE.txt)
+[![build-status-master](https://travis-ci.org/CollabServer/collabserver-client.svg?branch=master)](https://travis-ci.org/CollabServer/collabserver-client)
 
 | master | dev |
 | :-----: | :----: |
-| [![build-status-master](https://travis-ci.org/CollabServer/collab-client-interface.svg?branch=master)](https://travis-ci.org/CollabServer/collab-client-interface) | [![build-status-master](https://travis-ci.org/CollabServer/collab-client-interface.svg?branch=dev)](https://travis-ci.org/CollabServer/collab-client-interface) |
+| [![build-status-master](https://travis-ci.org/CollabServer/collabserver-client.svg?branch=master)](https://travis-ci.org/CollabServer/collabserver-client) | [![build-status-master](https://travis-ci.org/CollabServer/collabserver-client.svg?branch=dev)](https://travis-ci.org/CollabServer/collabserver-client) |
 
 
 # Overview

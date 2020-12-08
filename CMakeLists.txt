@@ -1,86 +1,73 @@
 cmake_minimum_required(VERSION 3.14)
-project(collab-client-interface)
+project(collabserver-client)
 message(STATUS "Building project ${PROJECT_NAME}")
 
-if("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
+if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "in-source build not allowed. Use another directory.")
 endif()
 
 
-# ------------------------------------------------------------------------------
-# Dependencies / Misc
-# ------------------------------------------------------------------------------
-set(COLLAB_GITMODULES_DIR "${CMAKE_SOURCE_DIR}/gitmodules/")
+# Compiler Flags
+message(STATUS "Detected Operating System: ${CMAKE_SYSTEM_NAME}")
 
-include("CMake/AddCompilerFlags.cmake")
-include("CMake/AddDependencies.cmake")
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
-# ------------------------------------------------------------------------------
-# Client Interface (Static LIB)
-# ------------------------------------------------------------------------------
-include_directories("${CMAKE_SOURCE_DIR}/include")
-
-file(GLOB_RECURSE srcFiles "${CMAKE_SOURCE_DIR}/src/*.cpp")
-
-# DevNote:
-# This is actually ugly and a big trick. The goal is to concat the static lib
-# libcollabcommon straight into collabclient so that, the end user (Who uses
-# collabclient). Doesn't have to know about collabcommon!!
-# The 'best' way I found is to use extract both lib (ar -x) and create the
-# final lib from all .o files.
-
-add_library(collabclient_ONLY STATIC ${srcFiles})
-add_dependencies(collabclient_ONLY collab-common)
-
-set(COLLABCLIENT_LIB ${CMAKE_BINARY_DIR}/libcollabclient.a)
-set(COLLABCOMMON_DIR "${CMAKE_BINARY_DIR}/collab-common-build")
-
-add_custom_target(combine_common
-    COMMAND ar -x $<TARGET_FILE:collabcommon>
-    COMMAND ar -x $<TARGET_FILE:collabclient_ONLY>
-    COMMAND ar -qcs "${COLLABCLIENT_LIB}" *.o
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-    DEPENDS collabclient_ONLY collabcommon
-    )
-
-add_library(collabclient STATIC IMPORTED GLOBAL)
-add_dependencies(collabclient combine_common)
-add_custom_target(buildCollabclient ALL DEPENDS collabclient)
-
-set_target_properties(collabclient PROPERTIES
-    IMPORTED_LOCATION "${COLLABCLIENT_LIB}")
+if(NOT CMAKE_BUILD_TYPE)
+    message(WARNING "No BUILD_TYPE set for ${PROJECT_NAME}: uses default Release")
+    message(WARNING "Available build types: Debug Release RelWithDebInfo MinSizeRel")
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+message(STATUS "BUILD_TYPE for ${PROJECT_NAME}: ${CMAKE_BUILD_TYPE}")
 
 
-# ------------------------------------------------------------------------------
+# Dependencies
+message(STATUS "Adding dependencies for ${PROJECT_NAME}")
+include_directories("${PROJECT_SOURCE_DIR}/gitmodules/collabserver-datatypes/include")
+include_directories("${PROJECT_SOURCE_DIR}/gitmodules/collabserver-network/include")
+add_subdirectory("${PROJECT_SOURCE_DIR}/gitmodules/collabserver-datatypes")
+add_subdirectory("${PROJECT_SOURCE_DIR}/gitmodules/collabserver-network")
+
+
+# Library
+include_directories("${PROJECT_SOURCE_DIR}/include")
+file(GLOB_RECURSE srcFiles "${PROJECT_SOURCE_DIR}/src/*.cpp")
+add_library(${PROJECT_NAME}-lib STATIC ${srcFiles})
+target_link_libraries(${PROJECT_NAME}-lib collabserver-network-lib)
+
+
 # Examples
-# ------------------------------------------------------------------------------
 option(COLLAB_EXAMPLES "Build examples" OFF)
-
 if(COLLAB_EXAMPLES)
-    message(STATUS "Building examples")
+    message(STATUS "Building examples for ${PROJECT_NAME}")
 
-    add_executable(exampleClient examples/exampleClient.cpp)
-    add_custom_target(runExampleClient exampleClient)
-    target_link_libraries(exampleClient collabclient zmq pthread)
+    add_executable(${PROJECT_NAME}-example examples/exampleClient.cpp)
+    add_custom_target(runExamples ${PROJECT_NAME}-example)
+    target_link_libraries(${PROJECT_NAME}-example collabserver-client-lib pthread)
+    #target_link_libraries(${PROJECT_NAME}-example collabclient pthread)
 endif()
 
 
-# ------------------------------------------------------------------------------
 # Tests
-# ------------------------------------------------------------------------------
-option(COLLAB_TESTS "Build tests" OFF)
-
+option(COLLAB_TESTS "Build Tests" OFF)
 if(COLLAB_TESTS)
-    message(STATUS "Building tests")
+    message(STATUS "Build tests for ${PROJECT_NAME}")
     enable_testing()
 
-    file(GLOB_RECURSE srcFilesTests "${CMAKE_SOURCE_DIR}/test/*.cpp")
+    include_directories("${PROJECT_SOURCE_DIR}/include/")
+    file(GLOB_RECURSE srcFilesTests "${PROJECT_SOURCE_DIR}/test/*.cpp")
+    add_executable(${PROJECT_NAME}-tests ${srcFilesTests} ${srcFilesRoom})
 
-    add_executable(tests ${srcFilesTests})
-    add_test(NAME googletests COMMAND tests)
-    add_custom_target(runTests tests)
-    target_link_libraries(tests gtest collabclient zmq pthread)
+    # Googletest dependency
+    include_directories("${PROJECT_SOURCE_DIR}/extern/googletest/googletest/include/")
+    add_subdirectory("${PROJECT_SOURCE_DIR}/extern/googletest-1.10.0")
+    target_link_libraries(${PROJECT_NAME}-tests gtest)
+
+    # Lib dependency
+    target_link_libraries(${PROJECT_NAME}-tests collabserver-client-lib pthread)
+
+    # Tests target
+    add_test(NAME googletests COMMAND ${PROJECT_NAME}-tests)
+    add_custom_target(runTests ${PROJECT_NAME}-tests)
 endif()
-
 

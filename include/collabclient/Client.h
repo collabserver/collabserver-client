@@ -153,7 +153,8 @@ class Client : CollabDataOperationObserver {
      *
      * \param op Operation to broadcast.
      */
-    void onOperation(const Operation& op) override;
+    void onOperation(const CollabDataOperation& op) override;
 };
 
 }  // namespace collab
+
