@@ -3,6 +3,7 @@
 
 Cleanup:
     ☐ Update all pointers with safer type (e.g., `std::unique_ptr`)
+    ☐ Remove the direct dependency with ZeroMQ in client (should be in `collabserver-network`)
 Upgrade:
     ☐ Create actual tests (empty for now)
 Readme:
